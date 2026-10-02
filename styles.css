@@ -1,0 +1,200 @@
+/* ====== RESET & BASE ====== */
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  background: #0f172a;
+  color: #e2e8f0;
+  min-height: 100vh;
+}
+.hidden { display: none !important; }
+
+/* ====== SVG ICON HELPERS ====== */
+.icon {
+  display: inline-block;
+  vertical-align: middle;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.icon-sm { width: 14px; height: 14px; }
+.icon-lg { width: 24px; height: 24px; }
+.icon-xl { width: 32px; height: 32px; }
+.icon-amber { color: #f59e0b; }
+.icon-red { color: #dc2626; }
+.icon-green { color: #16a34a; }
+.icon-blue { color: #3b82f6; }
+.icon-muted { color: #64748b; }
+.icon-white { color: #e2e8f0; }
+
+/* ====== LOGIN ====== */
+.login-screen {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1e3a8a, #0f172a);
+}
+.login-card {
+  background: #1e293b; padding: 40px; border-radius: 12px;
+  width: 380px; text-align: center;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+.login-logo { margin-bottom: 12px; }
+.login-card h1 { color: #f59e0b; font-size: 2rem; margin-bottom: 8px; }
+.login-card p { color: #94a3b8; margin-bottom: 20px; font-size: 0.85rem; }
+.login-card input {
+  width: 100%; padding: 12px; margin: 8px 0;
+  background: #0f172a; border: 1px solid #334155;
+  border-radius: 6px; color: #e2e8f0;
+}
+.login-card button {
+  width: 100%; padding: 12px; margin-top: 12px;
+  background: #f59e0b; color: #0f172a;
+  border: none; border-radius: 6px; font-weight: bold; cursor: pointer;
+}
+.login-card button:hover { background: #d97706; }
+.support { font-size: 0.75rem; margin-top: 20px; }
+
+/* ====== TOP BAR ====== */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  background: #1e293b; padding: 10px 20px;
+  border-bottom: 2px solid #f59e0b;
+  flex-wrap: wrap; gap: 8px;
+}
+.brand {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 1.3rem; font-weight: bold; color: #f59e0b;
+}
+.brand-icon { flex-shrink: 0; }
+.brand span { color: #64748b; font-size: 0.8rem; margin-left: 4px; }
+.main-nav { display: flex; gap: 6px; flex-wrap: wrap; }
+.nav-btn {
+  background: transparent; color: #cbd5e1;
+  border: 1px solid #334155; padding: 8px 14px;
+  border-radius: 6px; cursor: pointer; font-size: 0.85rem;
+  transition: background 0.15s;
+}
+.nav-btn:hover { background: #334155; }
+.nav-btn.active { background: #f59e0b; color: #0f172a; font-weight: bold; }
+.logout-btn {
+  display: flex; align-items: center; gap: 6px;
+  background: #dc2626; color: white; border: none;
+  padding: 8px 16px; border-radius: 6px; cursor: pointer;
+}
+
+/* ====== VIEW CONTAINER ====== */
+.view-container { padding: 24px; }
+
+/* ====== SECTION HEADERS ====== */
+.section-title {
+  display: flex; align-items: center; gap: 10px;
+  color: #f59e0b; margin-bottom: 20px; font-size: 1.4rem;
+}
+.section-title .icon { width: 26px; height: 26px; }
+
+/* ====== SUMMARY CARDS ====== */
+.summary-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px; margin-bottom: 24px;
+}
+.summary-card {
+  background: #1e293b; padding: 20px; border-radius: 10px;
+  border-left: 4px solid #f59e0b;
+}
+.summary-card h3 {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.85rem; color: #94a3b8; margin-bottom: 8px;
+}
+.summary-card .value { font-size: 1.8rem; font-weight: bold; color: #f59e0b; }
+
+/* ====== TABLES ====== */
+.data-table {
+  width: 100%; border-collapse: collapse;
+  background: #1e293b; border-radius: 8px; overflow: hidden;
+}
+.data-table th, .data-table td {
+  padding: 12px; text-align: left; border-bottom: 1px solid #334155;
+}
+.data-table th { background: #334155; color: #f59e0b; font-size: 0.85rem; }
+.data-table tr:hover { background: #273449; }
+
+/* ====== FORMS ====== */
+.form-section {
+  background: #1e293b; padding: 20px; border-radius: 10px; margin-bottom: 20px;
+}
+.form-section h2 {
+  display: flex; align-items: center; gap: 8px;
+  color: #f59e0b; margin-bottom: 16px; font-size: 1.1rem;
+}
+.form-row {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px; margin-bottom: 12px;
+}
+.form-row label { display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 4px; }
+.form-row input, .form-row select, .form-row textarea {
+  width: 100%; padding: 8px; background: #0f172a;
+  border: 1px solid #334155; border-radius: 6px; color: #e2e8f0;
+}
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #f59e0b; color: #0f172a; border: none;
+  padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;
+}
+.btn-primary:hover { background: #d97706; }
+.btn-danger {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: #dc2626; color: white; border: none;
+  padding: 6px 12px; border-radius: 4px; cursor: pointer;
+}
+.btn-success {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: #16a34a; color: white; border: none;
+  padding: 6px 12px; border-radius: 4px; cursor: pointer;
+}
+
+/* ====== STATUS BADGES ====== */
+.badge { padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; }
+.badge-success { background: #16a34a; color: white; }
+.badge-warning { background: #f59e0b; color: #0f172a; }
+.badge-danger  { background: #dc2626; color: white; }
+.badge-info    { background: #3b82f6; color: white; }
+
+/* ====== CHARTS ====== */
+.chart-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 16px; margin-top: 20px;
+}
+.chart-box { background: #1e293b; padding: 16px; border-radius: 10px; }
+.chart-box h3 {
+  display: flex; align-items: center; gap: 8px;
+  color: #f59e0b; margin-bottom: 12px; font-size: 1rem;
+}
+
+/* ====== MAP ====== */
+#liveMap {
+  width: 100%; min-height: 400px; background: #0f172a;
+  border-radius: 10px; border: 1px solid #334155;
+}
+.map-truck-card {
+  background: #0f172a; padding: 16px; margin: 8px;
+  border-radius: 8px; border-left: 4px solid #f59e0b; min-width: 300px;
+}
+.map-truck-card b { color: #f59e0b; }
+.map-truck-card span { color: #94a3b8; }
+
+/* ====== ALERT BOXES ====== */
+.alert-box {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 14px; border-radius: 8px; margin-bottom: 16px;
+}
+.alert-box.warning { background: rgba(245,158,11,0.1); border: 1px solid #f59e0b; }
+.alert-box.danger  { background: rgba(220,38,38,0.1); border: 1px solid #dc2626; }
+.alert-box.info    { background: rgba(59,130,246,0.1); border: 1px solid #3b82f6; }
+.alert-box .alert-text { flex: 1; }
+.alert-box .alert-text strong { display: block; margin-bottom: 4px; }
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 768px) {
+  .main-nav { flex-direction: column; }
+  .topbar { flex-direction: column; gap: 10px; }
+  .chart-grid { grid-template-columns: 1fr; }
+}
