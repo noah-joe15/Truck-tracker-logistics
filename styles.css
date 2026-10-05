@@ -1,26 +1,25 @@
 /* =====================================================
-   MALIBORA LOGISTICS - PROFESSIONAL THEME
+   MALIBORA LOGISTICS - PROFESSIONAL BLUE THEME
    WITH RESPONSIVE SIDE DRAWER
    ===================================================== */
 
 :root {
-  --primary: #0B6E4F;
-  --primary-dark: #063C2C;
-  --primary-light: #128A64;
-  --accent: #D4A017;
-  --accent-light: #E9C766;
-  --bg: #F4F7F6;
-  --text: #152420;
-  --text-light: #4B5B54;
+  --primary: #1e40af;
+  --primary-dark: #1e3a8a;
+  --primary-light: #3b82f6;
+  --accent: #f59e0b;
+  --accent-light: #fbbf24;
+  --bg: #f1f5f9;
+  --text: #0f172a;
+  --text-light: #64748b;
   --white: #FFFFFF;
-  --border: #DCE5DF;
-  --danger: #B3261E;
-  --success: #0B6E4F;
-  --shadow-sm: 0 1px 2px rgba(6,60,44,0.08);
-  --shadow-md: 0 8px 24px rgba(6,60,44,0.10);
-  --shadow-lg: 0 20px 48px rgba(6,60,44,0.16);
+  --border: #cbd5e1;
+  --danger: #dc2626;
+  --success: #16a34a;
+  --shadow-sm: 0 1px 2px rgba(30, 58, 138, 0.08);
+  --shadow-md: 0 8px 24px rgba(30, 58, 138, 0.10);
+  --shadow-lg: 0 20px 48px rgba(30, 58, 138, 0.16);
 
-  /* Dynamic sidebar width */
   --side-w: min(400px, 90%);
   --topbar-h: 70px; 
 }
@@ -43,14 +42,15 @@ body {
 * { -webkit-tap-highlight-color: transparent; }
 button, a, input, select, textarea { touch-action: manipulation; }
 
-/* ====== LOGIN SCREEN ====== */
+/* ====== LOGIN SCREEN WITH TRUCK BACKGROUND ====== */
 .login-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.9), rgba(30, 58, 138, 0.8)),
+              url('https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=1920&q=80') center/cover no-repeat;
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -112,7 +112,7 @@ button, a, input, select, textarea { touch-action: manipulation; }
 .login-card input:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(11, 110, 79, 0.1);
+  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
 }
 
 .login-card button#loginBtn {
@@ -126,13 +126,13 @@ button, a, input, select, textarea { touch-action: manipulation; }
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(11, 110, 79, 0.2);
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
   transition: all 0.2s;
 }
 
 .login-card button#loginBtn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(11, 110, 79, 0.3);
+  box-shadow: 0 6px 16px rgba(30, 64, 175, 0.3);
 }
 
 .login-card .support {
@@ -147,7 +147,7 @@ button, a, input, select, textarea { touch-action: manipulation; }
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.9);
   font-size: 12px;
   text-align: center;
 }
@@ -251,15 +251,15 @@ button, a, input, select, textarea { touch-action: manipulation; }
 }
 
 .connection-status.online {
-  background: rgba(11, 110, 79, 0.4);
-  color: #90EE90;
-  border: 1px solid rgba(144, 238, 144, 0.3);
+  background: rgba(22, 163, 74, 0.3);
+  color: #86efac;
+  border: 1px solid rgba(134, 239, 172, 0.3);
 }
 
 .connection-status.offline {
-  background: rgba(179, 38, 30, 0.4);
-  color: #FFB6B6;
-  border: 1px solid rgba(255, 182, 182, 0.3);
+  background: rgba(220, 38, 38, 0.3);
+  color: #fca5a5;
+  border: 1px solid rgba(252, 165, 165, 0.3);
 }
 
 .btn-logout {
@@ -311,7 +311,7 @@ button, a, input, select, textarea { touch-action: manipulation; }
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(6, 60, 44, 0.5);
+  background: rgba(30, 58, 138, 0.5);
   z-index: 85;
   opacity: 0;
   pointer-events: none;
@@ -351,9 +351,10 @@ body.nav-open {
 }
 
 .nav-btn i {
-  font-size: 20px;
+  font-size: 18px;
   width: 24px;
   text-align: center;
+  color: var(--primary);
 }
 
 .nav-btn:hover {
@@ -362,7 +363,7 @@ body.nav-open {
 }
 
 .nav-btn.active {
-  background: #E4F3EC;
+  background: #dbeafe;
   border-left-color: var(--primary);
   color: var(--primary-dark);
 }
@@ -387,6 +388,14 @@ h2 {
   color: var(--primary-dark);
   font-size: clamp(20px, 4.5vw, 24px);
   font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+h2 i {
+  color: var(--primary);
+  font-size: 24px;
 }
 
 h3 {
@@ -400,7 +409,7 @@ h3 {
 
 h3 i {
   color: var(--primary);
-  font-size: 20px;
+  font-size: 18px;
 }
 
 /* ====== DASHBOARD STATS ====== */
@@ -430,6 +439,14 @@ h3 i {
   margin-bottom: 8px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stat-card h3 i {
+  font-size: 16px;
+  color: var(--primary);
 }
 
 .stat-value {
@@ -440,7 +457,7 @@ h3 i {
 
 .stat-card.highlight {
   border-left: 5px solid var(--accent);
-  background: linear-gradient(135deg, var(--white), #FFFBF0);
+  background: linear-gradient(135deg, var(--white), #fffbeb);
 }
 
 /* ====== CARDS & FORMS ====== */
@@ -452,6 +469,7 @@ h3 i {
   border: 1px solid var(--border);
   max-width: 800px;
   width: 100%;
+  margin-bottom: 24px;
 }
 
 .form-grid {
@@ -485,7 +503,7 @@ h3 i {
 .input-field:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(11, 110, 79, 0.1);
+  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
 }
 
 .btn-primary {
@@ -498,7 +516,7 @@ h3 i {
   cursor: pointer;
   width: 100%;
   font-weight: 700;
-  box-shadow: 0 4px 12px rgba(11, 110, 79, 0.2);
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
   transition: all 0.2s;
   min-height: 46px;
   display: inline-flex;
@@ -509,7 +527,7 @@ h3 i {
 
 .btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(11, 110, 79, 0.3);
+  box-shadow: 0 6px 16px rgba(30, 64, 175, 0.3);
 }
 
 .btn-primary:disabled {
@@ -533,7 +551,7 @@ h3 i {
 }
 
 .btn-danger:hover {
-  background: #8b1f18;
+  background: #b91c1c;
 }
 
 .btn-success {
@@ -551,7 +569,7 @@ h3 i {
 }
 
 .btn-success:hover {
-  background: #085039;
+  background: #15803d;
 }
 
 /* ====== DATA TABLES ====== */
@@ -583,7 +601,7 @@ h3 i {
 }
 
 .data-table th {
-  background: #f8f9fa;
+  background: #f8fafc;
   font-weight: 700;
   color: var(--text);
   text-transform: uppercase;
@@ -592,14 +610,14 @@ h3 i {
 }
 
 .data-table tr:hover {
-  background: #fafbfc;
+  background: #f8fafc;
 }
 
 .status-ok {
   color: var(--success);
   font-weight: 700;
   padding: 4px 10px;
-  background: rgba(11, 110, 79, 0.1);
+  background: rgba(22, 163, 74, 0.1);
   border-radius: 20px;
   font-size: 12px;
   white-space: nowrap;
@@ -610,7 +628,7 @@ h3 i {
   color: var(--danger);
   font-weight: 700;
   padding: 4px 10px;
-  background: rgba(179, 38, 30, 0.1);
+  background: rgba(220, 38, 38, 0.1);
   border-radius: 20px;
   font-size: 12px;
   white-space: nowrap;
@@ -672,14 +690,14 @@ h3 i {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(11,110,79,.12);
+  background: rgba(30, 64, 175, .12);
   color: var(--primary);
-  font-size: 22px;
+  font-size: 20px;
   flex-shrink: 0;
 }
 
 .kpi-icon.gold {
-  background: rgba(212,160,23,.15);
+  background: rgba(245, 158, 11, .15);
   color: var(--accent);
 }
 
@@ -719,7 +737,7 @@ h3 i {
 .badge-success { background: var(--success); color: white; }
 .badge-warning { background: var(--accent); color: var(--primary-dark); }
 .badge-danger  { background: var(--danger); color: white; }
-.badge-info    { background: #3b82f6; color: white; }
+.badge-info    { background: var(--primary-light); color: white; }
 
 /* ====== CHARTS ====== */
 .chart-grid {
@@ -757,10 +775,10 @@ h3 i {
   margin-bottom: 18px;
 }
 
-.alert-box.warning { background: rgba(212, 160, 23, 0.1); border: 1px solid var(--accent); }
-.alert-box.danger  { background: rgba(179, 38, 30, 0.1); border: 1px solid var(--danger); }
-.alert-box.info    { background: rgba(59, 130, 246, 0.1); border: 1px solid #3b82f6; }
-.alert-box.success { background: rgba(11, 110, 79, 0.1); border: 1px solid var(--success); }
+.alert-box.warning { background: rgba(245, 158, 11, 0.1); border: 1px solid var(--accent); }
+.alert-box.danger  { background: rgba(220, 38, 38, 0.1); border: 1px solid var(--danger); }
+.alert-box.info    { background: rgba(59, 130, 246, 0.1); border: 1px solid var(--primary-light); }
+.alert-box.success { background: rgba(22, 163, 74, 0.1); border: 1px solid var(--success); }
 
 .alert-box .alert-text { flex: 1; }
 .alert-box .alert-text strong { display: block; margin-bottom: 4px; color: var(--text); }
