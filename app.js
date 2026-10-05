@@ -1,8 +1,8 @@
 const App = {
   views: {
     dashboard:  Dashboard,
-    kpi:        KPI
-    expenses: Expenses,
+    kpi:        KPI,
+    expenses:   Expenses,
     map:        MapView,
     history:    { render: () => Operations.render() },
     analytics:  Analytics,
@@ -42,11 +42,9 @@ const App = {
 
   settingsView() {
     return `
-      <h2 style="color: var(--primary-dark); margin-bottom: 24px; display: flex; align-items: center; gap: 10px;">
-        <i class="fas fa-cog"></i> Settings
-      </h2>
-      <div class="card" style="margin-bottom: 24px;">
-        <h3><i class="fas fa-database"></i> Data Management</h3>
+      <h2 class="section-title"><i class="fas fa-cog"></i> Settings</h2>
+      <div class="form-section">
+        <h2><i class="fas fa-database"></i> Data Management</h2>
         <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px;">
           <button class="btn-primary" style="width: auto;" onclick="App.exportBackup()">
             <i class="fas fa-download"></i> Download Backup
@@ -57,14 +55,10 @@ const App = {
           </label>
         </div>
       </div>
-      <div class="card" style="margin-bottom: 24px;">
-        <h3><i class="fas fa-tags"></i> Expense Categories</h3>
-        <p style="color: var(--text-light); margin-top: 8px;">Fuel, Maintenance, Tolls, Parking, Salary, Other</p>
-      </div>
-      <div class="card" style="border: 2px solid var(--danger);">
-        <h3 style="color: var(--danger);"><i class="fas fa-exclamation-triangle"></i> Danger Zone</h3>
+      <div class="form-section" style="border: 2px solid var(--danger);">
+        <h2 style="color: var(--danger);"><i class="fas fa-exclamation-triangle"></i> Danger Zone</h2>
         <button class="btn-danger" style="margin-top: 12px;" onclick="App.factoryReset()">
-          <i class="fas fa-trash-alt"></i> Factory Reset App
+          <i class="fas fa-trash"></i> Factory Reset App
         </button>
       </div>
     `;
@@ -110,29 +104,26 @@ const App = {
 // INITIALIZATION & MOBILE MENU TOGGLE
 // =========================================================
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Initialize the main App
   App.init();
 
-  // 2. Mobile menu toggle logic
   const burger = document.getElementById('burgerBtn');
   const sidebar = document.getElementById('sidebar');
   const scrim = document.getElementById('scrim');
-  
+
   if (burger) {
     burger.addEventListener('click', () => {
       document.body.classList.toggle('nav-open');
       burger.classList.toggle('active');
     });
   }
-  
+
   if (scrim) {
     scrim.addEventListener('click', () => {
       document.body.classList.remove('nav-open');
       if (burger) burger.classList.remove('active');
     });
   }
-  
-  // Close menu when clicking a nav button on mobile
+
   document.querySelectorAll('.nav-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       if (window.innerWidth < 1080) {
