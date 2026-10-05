@@ -1,22 +1,17 @@
 const Auth = {
   init() {
     document.getElementById('loginBtn').addEventListener('click', () => this.login());
-    document.getElementById('logoutBtn').addEventListener('click', () => this.logout());
-    if (localStorage.getItem('iltm_logged_in') === '1') App.showApp();
   },
   login() {
-    const u = document.getElementById('loginUser').value.trim();
-    const p = document.getElementById('loginPass').value;
-    const stored = DB.get('credentials', { user: 'admin', pass: 'admin' });
-    if (u === stored.user && p === stored.pass) {
-      localStorage.setItem('iltm_logged_in', '1');
+    const username = document.getElementById('loginUser').value;
+    const password = document.getElementById('loginPass').value;
+    
+    // Simple authentication (replace with your logic)
+    if (username === 'admin' && password === 'admin') {
+      localStorage.setItem('iltm_logged_in', 'true');
       App.showApp();
     } else {
-      alert('Invalid credentials. Default: admin / admin');
+      alert('Invalid credentials. Try: admin / admin');
     }
-  },
-  logout() {
-    localStorage.removeItem('iltm_logged_in');
-    location.reload();
   }
 };
