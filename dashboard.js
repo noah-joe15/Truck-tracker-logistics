@@ -55,18 +55,22 @@ const Dashboard = {
           <tbody>${this.fleetRows(trucks, trips, expenses, income)}</tbody>
         </table>
       </div>
-
-      <div class="form-section">
-        <h2>${Icons.fuel} Fuel Analysis</h2>
-        <p>Total Fuel Used: <b>${Utils.fmtNum(this.totalFuel(trips))} L</b> |
-           Total Fuel Cost: <b>${Utils.fmtTZS(this.totalFuelCost(expenses))}</b></p>
-        <table class="data-table" style="margin-top:12px;">
-          <thead><tr><th>Truck</th><th>Fuel Used (L)</th><th>Fuel Cost (TZS)</th><th>% of Total</th></tr></thead>
-          <tbody>${this.fuelRows(trucks, trips, expenses)}</tbody>
-        </table>
-      </div>
-    `;
-  },
+      
+<div class="table-wrapper">
+  <table class="data-table">
+    <thead><tr><th>Truck</th><th>Profit</th><th>Eco (Km/L)</th><th>Service Status</th><th>Action</th></tr></thead>
+    <tbody>
+      ${trucks.map(t => `
+        <tr>
+          <td data-label="Truck">${Utils.esc(t.plateNumber)}</td>
+          <td data-label="Profit">${Utils.fmtTZS(rev-exp)}</td>
+          <td data-label="Eco (Km/L)">${eco}</td>
+          <td data-label="Status">${Utils.statusBadge(t.serviceStatus || 'Active')}</td>
+          <td data-label="Action"><button class="btn-success" onclick="Trucks.markService('${t.id}')">Service Done</button></td>
+        </tr>`).join('')}
+    </tbody>
+  </table>
+</div>
 
   fleetRows(trucks, trips, expenses, income) {
     if (!trucks.length) return '<tr><td colspan="5" style="text-align:center;color:#64748b;">No trucks yet</td></tr>';
