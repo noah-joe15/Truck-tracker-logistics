@@ -3,6 +3,69 @@
    WITH RESPONSIVE SIDE DRAWER
    ===================================================== */
 
+/* ====== GLOBAL ICON SIZE LOCK ====== */
+/* This prevents ANY icon from ever becoming huge */
+i.fas, i.far, i.fab, i.fal, i.fad,
+.fas, .far, .fab, .fal, .fad {
+  font-size: 16px !important;
+  width: auto !important;
+  height: auto !important;
+  line-height: 1 !important;
+  vertical-align: middle;
+}
+
+/* Sidebar nav icons */
+.nav-btn i {
+  font-size: 18px !important;
+  width: 24px !important;
+  text-align: center;
+}
+
+/* Heading icons */
+h2 i, h3 i {
+  font-size: 20px !important;
+}
+
+/* Button icons */
+.btn-primary i, .btn-danger i, .btn-success i, .btn-logout i {
+  font-size: 14px !important;
+}
+
+/* Inline SVG icons */
+svg.icon {
+  width: 18px !important;
+  height: 18px !important;
+  flex-shrink: 0;
+}
+
+svg.icon-sm {
+  width: 14px !important;
+  height: 14px !important;
+}
+
+svg.icon-lg {
+  width: 24px !important;
+  height: 24px !important;
+}
+
+/* KPI panel icons */
+.kpi-icon {
+  font-size: 20px !important;
+  width: 42px !important;
+  height: 42px !important;
+}
+
+/* Status/connection icons */
+.connection-status i {
+  font-size: 12px !important;
+}
+
+/* Brand logo icon */
+.brand-icon {
+  width: 36px !important;
+  height: 36px !important;
+}
+
 :root {
   --primary: #1e40af;
   --primary-dark: #1e3a8a;
@@ -351,12 +414,11 @@ body.nav-open {
 }
 
 .nav-btn i {
-  font-size: 18px;
-  width: 24px;
+  font-size: 18px !important;
+  width: 24px !important;
   text-align: center;
   color: var(--primary);
 }
-
 .nav-btn:hover {
   background: var(--bg);
   color: var(--primary);
@@ -854,65 +916,22 @@ h3 i {
   .login-footer { bottom: calc(20px + env(safe-area-inset-bottom)); }
 }
 
-/* ====== GLOBAL ICON SIZE LOCK ====== */
-/* This prevents ANY icon from ever becoming huge */
-i.fas, i.far, i.fab, i.fal, i.fad,
-.fas, .far, .fab, .fal, .fad {
+/* ====== NUCLEAR ICON OVERRIDE ====== */
+/* Catches any icon that somehow becomes huge */
+i[class*="fa-"] {
   font-size: 16px !important;
-  width: auto !important;
-  height: auto !important;
-  line-height: 1 !important;
-  vertical-align: middle;
+  max-width: 24px !important;
+  max-height: 24px !important;
 }
 
-/* Sidebar nav icons */
-.nav-btn i {
-  font-size: 18px !important;
-  width: 24px !important;
-  text-align: center;
+/* Prevent SVGs from ever exceeding reasonable size */
+svg:not(.brand-icon):not(.login-logo) {
+  max-width: 24px !important;
+  max-height: 24px !important;
 }
 
-/* Heading icons */
-h2 i, h3 i {
-  font-size: 20px !important;
-}
-
-/* Button icons */
-.btn-primary i, .btn-danger i, .btn-success i, .btn-logout i {
-  font-size: 14px !important;
-}
-
-/* Inline SVG icons */
-svg.icon {
-  width: 18px !important;
-  height: 18px !important;
-  flex-shrink: 0;
-}
-
-svg.icon-sm {
-  width: 14px !important;
-  height: 14px !important;
-}
-
-svg.icon-lg {
-  width: 24px !important;
-  height: 24px !important;
-}
-
-/* KPI panel icons */
-.kpi-icon {
-  font-size: 20px !important;
-  width: 42px !important;
-  height: 42px !important;
-}
-
-/* Status/connection icons */
-.connection-status i {
-  font-size: 12px !important;
-}
-
-/* Brand logo icon */
-.brand-icon {
-  width: 36px !important;
-  height: 36px !important;
+/* Exception for KPI icons which are intentionally larger */
+.kpi-icon svg {
+  max-width: 42px !important;
+  max-height: 42px !important;
 }
