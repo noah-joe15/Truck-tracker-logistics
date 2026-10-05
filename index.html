@@ -107,11 +107,10 @@
     </div>
   </div>
 
-  <!-- SCRIPTS: ORDER MATTERS! -->
+  <!-- SCRIPTS: ORDER MATTERS! (app.js MUST be last) -->
   <script src="storage.js"></script>
   <script src="utils.js"></script>
   <script src="auth.js"></script>
-  <script src="app.js"></script>
   <script src="dashboard.js"></script>
   <script src="kpi.js"></script>
   <script src="operations.js"></script>
@@ -120,9 +119,9 @@
   <script src="customers.js"></script>
   <script src="compliance.js"></script>
   <script src="debt.js"></script>
-  <script src="expenses.js"></script>   <!-- ADDED HERE: Must be before app.js -->
+  <script src="expenses.js"></script>
   <script src="analytics.js"></script>
   <script src="map.js"></script>
-  <script src="app.js"></script>        <!-- LAST: Initializes everything -->
+  <script src="app.js"></script> 
 </body>
 </html>
