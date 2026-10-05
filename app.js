@@ -1,7 +1,8 @@
 const App = {
   views: {
     dashboard:  Dashboard,
-    kpi:        KPI,
+    kpi:        KPI
+    expenses: Expenses,
     map:        MapView,
     history:    { render: () => Operations.render() },
     analytics:  Analytics,
