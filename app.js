@@ -10,7 +10,6 @@ const App = {
     compliance: Compliance,
     settings:   { render: () => App.settingsView() }
   },
-};
 
   init() {
     Auth.init();
@@ -109,6 +108,9 @@ const App = {
   }
 };
 
+// =========================================================
+// INITIALIZATION & MOBILE MENU TOGGLE
+// =========================================================
 document.addEventListener('DOMContentLoaded', () => {
   App.init();
 
