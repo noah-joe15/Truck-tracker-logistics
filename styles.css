@@ -466,3 +466,94 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   overflow: hidden;
   word-wrap: break-word;
 }
+
+/* ====== CRITICAL: Fix Input Overflow on Mobile ====== */
+
+/* Force all inputs to respect container width */
+.input-field,
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="password"],
+input[type="email"],
+input[type="tel"],
+select.input-field,
+select,
+textarea {
+  max-width: 100% !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Prevent form groups from overflowing */
+.form-group {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden;
+}
+
+/* Ensure form rows don't cause horizontal scroll */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Multi-column on larger screens */
+@media (min-width: 768px) {
+  .form-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .form-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Fix for form sections to prevent overflow */
+.form-section {
+  max-width: 100% !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Specific fix for date inputs on mobile */
+input[type="date"] {
+  font-size: 15px;
+  padding: 11px 14px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* Ensure all containers respect viewport */
+.main-content {
+  max-width: 100vw;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* Nuclear option: prevent ANY element from causing horizontal scroll */
+* {
+  max-width: 100%;
+}
+
+img, svg, canvas, video {
+  max-width: 100%;
+  height: auto;
+}
