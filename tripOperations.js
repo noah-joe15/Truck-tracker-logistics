@@ -84,9 +84,10 @@ const TripOps = {
             <input type="text" id="drvLicense" class="input-field" placeholder="License number">
           </div>
           <div class="form-group">
-            <label>Assign Truck</label>
+            <label>Assign Truck (Optional)</label>
             <select id="drvTruck" class="input-field">
-              ${Utils.optionsHTML(trucks, 'plateNumber', 'id', 'None (Unassigned)')}
+              <option value="">None (Unassigned)</option>
+              ${trucks.map(t => `<option value="${t.id}">${t.plateNumber}</option>`).join('')}
             </select>
           </div>
         </div>
@@ -132,16 +133,22 @@ const TripOps = {
           <div class="form-group">
             <label>Truck</label>
             <select id="tripTruck" class="input-field" onchange="TripOps.autoFillDriver()">
-              ${Utils.optionsHTML(trucks, 'plateNumber', 'id', 'Select Truck...')}
+              <option value="">-- Select Truck --</option>
+              ${trucks.map(t => `<option value="${t.id}" data-driver="${t.driverId || ''}">${t.plateNumber}</option>`).join('')}
             </select>
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label>Driver (Auto-filled from Truck)</label>
-            <input type="text" id="tripDriver" class="input-field" readonly placeholder="Select a truck first" style="background-color: #f1f5f9; color: #64748b;">
-            <input type="hidden" id="tripDriverId">
+            <label>Select Driver</label>
+            <select id="tripDriver" class="input-field">
+              <option value="">-- Select Driver --</option>
+              ${drivers.map(d => {
+                const truck = trucks.find(t => t.id === d.truckId);
+                return `<option value="${d.id}">${d.name}${truck ? ' (' + Utils.esc(truck.plateNumber) + ')' : ' (Unassigned)'}</option>`;
+              }).join('')}
+            </select>
           </div>
           <div class="form-group">
             <label>Customer</label>
@@ -335,27 +342,21 @@ const TripOps = {
   // ======================== TRIP LOGIC ========================
   autoFillDriver() {
     const truckSelect = document.getElementById('tripTruck');
-    const driverInput = document.getElementById('tripDriver');
-    const driverIdInput = document.getElementById('tripDriverId');
-    if (!truckSelect || !driverInput) return;
+    const driverSelect = document.getElementById('tripDriver');
+    if (!truckSelect || !driverSelect) return;
 
-    const selectedOption = truckSelect.options[truckSelect.selectedIndex];
-    const driverId = selectedOption.getAttribute('data-driver');
-
-    if (driverId) {
-      const driver = DB.drivers().find(d => d.id === driverId);
-      if (driver) {
-        driverInput.value = driver.name;
-        driverIdInput.value = driver.id;
-        driverInput.style.color = '#0f172a';
-        driverInput.style.backgroundColor = '#ffffff';
-      }
+    const truckId = truckSelect.value;
+    const drivers = DB.drivers();
+    
+    // Find if this truck has an assigned driver
+    const assignedDriver = drivers.find(d => d.truckId === truckId);
+    
+    if (assignedDriver) {
+      // Auto-select the assigned driver in the dropdown
+      driverSelect.value = assignedDriver.id;
     } else {
-      driverInput.value = '';
-      driverIdInput.value = '';
-      driverInput.placeholder = 'No driver assigned to this truck';
-      driverInput.style.color = '#64748b';
-      driverInput.style.backgroundColor = '#f1f5f9';
+      // Reset to "Select Driver"
+      driverSelect.value = '';
     }
   },
 
@@ -438,12 +439,15 @@ const TripOps = {
     const totalPrice = Number(document.getElementById('tripTotalPrice').value) || 0;
     const paidAmount = Number(document.getElementById('tripPaidAmount').value) || 0;
     const balance = totalPrice - paidAmount;
+    
+    // Read directly from the dropdowns
+    const truckId = document.getElementById('tripTruck').value;
+    const driverId = document.getElementById('tripDriver').value;
     const customerId = document.getElementById('tripCustomer').value;
-    const driverId = document.getElementById('tripDriverId').value;
 
     const trip = {
       date: document.getElementById('tripDate').value,
-      truckId: document.getElementById('tripTruck').value,
+      truckId: truckId,
       driverId: driverId,
       customerId: customerId,
       type: document.getElementById('tripType').value,
@@ -457,7 +461,8 @@ const TripOps = {
       onTime: document.getElementById('tripOnTime').value === '1'
     };
 
-    if (!trip.truckId || !trip.driverId) return alert('Please select a truck (and ensure it has a driver assigned).');
+    if (!trip.truckId) return alert('Please select a truck.');
+    if (!trip.driverId) return alert('Please select a driver from the dropdown.');
     if (!trip.from || !trip.to) return alert('Please select both Origin and Destination regions.');
 
     DB.push('trips', trip);
