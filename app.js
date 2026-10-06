@@ -8,6 +8,7 @@ const App = {
     analytics:  Analytics,
     debt:       Debt,
     operations: Operations,
+    operations: TripOps
     compliance: Compliance,
     settings:   { render: () => App.settingsView() }
   },
