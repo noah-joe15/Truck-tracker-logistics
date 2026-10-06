@@ -1,4 +1,3 @@
-
 const App = {
   views: {
     dashboard:  Dashboard,
@@ -7,8 +6,7 @@ const App = {
     history:    { render: () => Operations.render() },
     analytics:  Analytics,
     debt:       Debt,
-    operations: Operations,
-    operations: TripOps
+    operations: Operations,  // Fixed: removed duplicate, added comma
     compliance: Compliance,
     settings:   { render: () => App.settingsView() }
   },
@@ -27,22 +25,14 @@ const App = {
   },
 
   navigate(view) {
-    // Remove active class from all buttons
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    
-    // Add active class to the clicked button
     const activeBtn = document.querySelector(`[data-view="${view}"]`);
     if (activeBtn) activeBtn.classList.add('active');
-    
-    // Render the view
     const v = this.views[view];
     if (!v) return;
-    
     document.getElementById('viewContainer').innerHTML = v.render();
-    
-    // Call afterRender if it exists (for charts, etc.)
     if (v.afterRender) {
-      setTimeout(() => v.afterRender(), 50); // Small delay ensures DOM is ready
+      setTimeout(() => v.afterRender(), 50);
     }
   },
 
@@ -118,14 +108,9 @@ const App = {
   }
 };
 
-// =========================================================
-// INITIALIZATION & MOBILE MENU TOGGLE
-// =========================================================
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Initialize the main App (sets up login button and nav clicks)
   App.init();
 
-  // 2. Mobile menu toggle logic
   const burger = document.getElementById('burgerBtn');
   const sidebar = document.getElementById('sidebar');
   const scrim = document.getElementById('scrim');
@@ -144,7 +129,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   
-  // Close menu when clicking a nav button on mobile
   document.querySelectorAll('.nav-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       if (window.innerWidth < 1080) {
