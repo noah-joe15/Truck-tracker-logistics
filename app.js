@@ -1,8 +1,8 @@
+
 const App = {
   views: {
     dashboard:  Dashboard,
     kpi:        KPI,
-    expenses:   Expenses,
     map:        MapView,
     history:    { render: () => Operations.render() },
     analytics:  Analytics,
@@ -52,9 +52,7 @@ const App = {
 
   settingsView() {
     return `
-      <div class="section-title">
-        <h2><i class="fas fa-cog"></i> Settings</h2>
-      </div>
+      <h2 class="section-title"><i class="fas fa-cog"></i> Settings</h2>
       <div class="form-section">
         <h2><i class="fas fa-database"></i> Data Management</h2>
         <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px;">
@@ -69,8 +67,7 @@ const App = {
       </div>
       <div class="form-section" style="border: 2px solid var(--danger);">
         <h2 style="color: var(--danger);"><i class="fas fa-exclamation-triangle"></i> Danger Zone</h2>
-        <p style="color: var(--text-light); margin-bottom: 12px;">This will permanently delete all trucks, drivers, trips, and financial records.</p>
-        <button class="btn-danger" onclick="App.factoryReset()">
+        <button class="btn-danger" style="margin-top: 12px;" onclick="App.factoryReset()">
           <i class="fas fa-trash"></i> Factory Reset App
         </button>
       </div>
@@ -106,14 +103,14 @@ const App = {
         alert('Backup restored successfully.');
         App.refresh();
       } catch { 
-        alert('Invalid backup file. Please select a valid .json file.'); 
+        alert('Invalid backup file.'); 
       }
     };
     reader.readAsText(file);
   },
 
   factoryReset() {
-    if (confirm('WARNING: This will DELETE ALL DATA permanently. Are you sure you want to continue?')) {
+    if (confirm('This will DELETE ALL DATA. Are you sure you want to continue?')) {
       DB.clearAll();
       location.reload();
     }
