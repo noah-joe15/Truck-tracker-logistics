@@ -3,13 +3,14 @@ const App = {
     dashboard:  Dashboard,
     kpi:        KPI,
     map:        MapView,
-    history:    { render: () => Operations.render() },
+    history:    { render: () => TripOps.render() }, 
     analytics:  Analytics,
     debt:       Debt,
-    operations: Operations,  // Fixed: removed duplicate, added comma
+    operations: TripOps,  
     compliance: Compliance,
     settings:   { render: () => App.settingsView() }
   },
+};
 
   init() {
     Auth.init();
