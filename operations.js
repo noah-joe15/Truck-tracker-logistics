@@ -1,3 +1,41 @@
+// Tanzania Mainland Regions (2022 Census) & Approximate Capital Coordinates
+const tzRegions = [
+  'Arusha', 'Dar es Salaam', 'Dodoma', 'Geita', 'Iringa', 
+  'Kagera', 'Katavi', 'Kigoma', 'Kilimanjaro', 'Lindi', 
+  'Manyara', 'Mara', 'Mbeya', 'Morogoro', 'Mtwara', 
+  'Mwanza', 'Njombe', 'Pwani', 'Rukwa', 'Ruvuma', 
+  'Shinyanga', 'Simiyu', 'Singida', 'Tabora', 'Tanga', 'Songwe'
+];
+
+const regionCoords = {
+  'Arusha': { lat: -3.3869, lon: 36.6830 },
+  'Dar es Salaam': { lat: -6.7924, lon: 39.2083 },
+  'Dodoma': { lat: -6.1630, lon: 35.7516 },
+  'Geita': { lat: -2.8714, lon: 32.2275 },
+  'Iringa': { lat: -7.7697, lon: 35.6917 },
+  'Kagera': { lat: -1.3314, lon: 31.8133 },
+  'Katavi': { lat: -6.3500, lon: 31.2500 },
+  'Kigoma': { lat: -4.8767, lon: 29.6269 },
+  'Kilimanjaro': { lat: -3.3500, lon: 37.3333 },
+  'Lindi': { lat: -9.9972, lon: 39.7167 },
+  'Manyara': { lat: -4.2167, lon: 35.7500 },
+  'Mara': { lat: -1.5000, lon: 33.8000 },
+  'Mbeya': { lat: -8.9000, lon: 33.4500 },
+  'Morogoro': { lat: -6.8211, lon: 37.6636 },
+  'Mtwara': { lat: -10.2694, lon: 40.1833 },
+  'Mwanza': { lat: -2.5167, lon: 32.9000 },
+  'Njombe': { lat: -9.3333, lon: 34.7667 },
+  'Pwani': { lat: -7.1000, lon: 38.7000 },
+  'Rukwa': { lat: -7.9500, lon: 31.1500 },
+  'Ruvuma': { lat: -10.6833, lon: 35.6500 },
+  'Shinyanga': { lat: -3.6667, lon: 33.4167 },
+  'Simiyu': { lat: -2.8333, lon: 33.5500 },
+  'Singida': { lat: -4.8167, lon: 34.7500 },
+  'Tabora': { lat: -5.0167, lon: 32.8000 },
+  'Tanga': { lat: -5.0667, lon: 39.1000 },
+  'Songwe': { lat: -9.1167, lon: 33.5000 }
+};
+
 const Operations = {
   render() {
     const trucks = DB.trucks(), drivers = DB.drivers(), customers = DB.customers();
@@ -41,7 +79,7 @@ const Operations = {
 
         <div class="form-row">
           <div class="form-group">
-            <label>Type</label>
+            <label>Trip Type</label>
             <select id="tripType" class="input-field">
               <option>Single Trip</option>
               <option>Round Trip</option>
@@ -58,19 +96,25 @@ const Operations = {
 
         <div class="form-row">
           <div class="form-group">
-            <label>From</label>
-            <input type="text" id="tripFrom" class="input-field" placeholder="Dar es Salaam">
+            <label>From (Region)</label>
+            <select id="tripFrom" class="input-field" onchange="Operations.calculateDistance()">
+              <option value="">-- Select Origin Region --</option>
+              ${tzRegions.map(r => `<option value="${r}">${r}</option>`).join('')}
+            </select>
           </div>
           <div class="form-group">
-            <label>To</label>
-            <input type="text" id="tripTo" class="input-field" placeholder="Arusha">
+            <label>To (Region)</label>
+            <select id="tripTo" class="input-field" onchange="Operations.calculateDistance()">
+              <option value="">-- Select Destination Region --</option>
+              ${tzRegions.map(r => `<option value="${r}">${r}</option>`).join('')}
+            </select>
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group">
             <label>Distance (Km)</label>
-            <input type="number" id="tripDist" class="input-field" placeholder="0" min="0" oninput="Operations.updateFuelEstimate()">
+            <input type="number" id="tripDist" class="input-field" placeholder="Auto-calculated" min="0" oninput="Operations.updateFuelEstimate()">
           </div>
           <div class="form-group">
             <label>Revenue (TZS)</label>
@@ -125,6 +169,40 @@ const Operations = {
     `;
   },
 
+  // Haversine formula to calculate road distance estimate
+  calculateDistance() {
+    const from = document.getElementById('tripFrom').value;
+    const to = document.getElementById('tripTo').value;
+    const distInput = document.getElementById('tripDist');
+
+    if (from && to && regionCoords[from] && regionCoords[to]) {
+      const lat1 = regionCoords[from].lat;
+      const lon1 = regionCoords[from].lon;
+      const lat2 = regionCoords[to].lat;
+      const lon2 = regionCoords[to].lon;
+
+      const R = 6371; // Earth radius in km
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      
+      const a = 
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      
+      // Multiply by 1.25 to approximate actual road distance vs straight-line distance
+      const roadDistance = Math.round(R * c * 1.25);
+      
+      distInput.value = roadDistance;
+      this.updateFuelEstimate();
+    } else {
+      distInput.value = '';
+      this.updateFuelEstimate();
+    }
+  },
+
   tripRows(trips, trucks, drivers) {
     if (!trips.length) {
       return '<tr><td colspan="8" style="text-align:center; color:#64748b; padding: 30px;">No trips recorded yet.</td></tr>';
@@ -173,6 +251,8 @@ const Operations = {
       onTime: document.getElementById('tripOnTime').value === '1'
     };
     if (!trip.truckId || !trip.driverId) return alert('Please select a truck and driver.');
+    if (!trip.from || !trip.to) return alert('Please select both Origin and Destination regions.');
+    
     DB.push('trips', trip);
     if (Number(trip.revenue) > 0) {
       DB.push('income', {
