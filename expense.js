@@ -1,23 +1,11 @@
 const Expenses = {
-  // Comprehensive Tanzania trucking expense categories
   categories: [
-    'Fuel (Diesel/Petrol)',
-    'Maintenance & Servicing',
-    'Spare Parts',
-    'Tolls & Weighbridge',
-    'Parking Fees',
-    'Driver Allowance / Per Diem',
-    'Loading / Offloading',
-    'LATRA / Regulatory Fees',
-    'Insurance Renewal',
-    'Fines / Penalties',
-    'Other'
+    'Fuel (Diesel/Petrol)', 'Maintenance & Servicing', 'Spare Parts',
+    'Tolls & Weighbridge', 'Parking Fees', 'Driver Allowance / Per Diem',
+    'Loading / Offloading', 'LATRA / Regulatory Fees', 'Insurance Renewal',
+    'Fines / Penalties', 'Other'
   ],
-
-  // Tanzanian Mobile Money Providers
   mobileProviders: ['M-Pesa (Vodacom)', 'Tigo Pesa', 'Airtel Money', 'HaloPesa (TTCL)'],
-
-  // Tanzanian Banks
   banks: [
     'CRDB Bank', 'NMB Bank', 'NBC Bank', 'Stanbic Bank', 'Absa Bank',
     'Exim Bank', 'DTB', 'Azania Bank', 'KCB Bank', 'Equity Bank',
@@ -31,7 +19,9 @@ const Expenses = {
     const totalExp = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
 
     return `
-      <h2 class="section-title"><i class="fas fa-wallet"></i> Expense Management</h2>
+      <div class="section-title">
+        <h2><i class="fas fa-wallet"></i> Expense Management</h2>
+      </div>
       
       <div class="form-section">
         <h2><i class="fas fa-plus-circle"></i> Record New Expense</h2>
@@ -84,7 +74,6 @@ const Expenses = {
             </select>
           </div>
           
-          <!-- Conditional: Mobile Money Providers -->
           <div class="form-group" id="mobileProviderGroup" style="display: none;">
             <label>Mobile Provider</label>
             <select id="expMobileProvider" class="input-field">
@@ -93,7 +82,6 @@ const Expenses = {
             </select>
           </div>
 
-          <!-- Conditional: Banks -->
           <div class="form-group" id="bankGroup" style="display: none;">
             <label>Bank Name</label>
             <select id="expBank" class="input-field">
@@ -103,7 +91,7 @@ const Expenses = {
           </div>
         </div>
 
-        <button class="btn-primary" onclick="Expenses.save()" style="margin-top: 24px;">
+        <button class="btn-primary" onclick="Expenses.save()" style="margin-top: 16px;">
           <i class="fas fa-save"></i> Save Transaction
         </button>
       </div>
@@ -113,7 +101,7 @@ const Expenses = {
           <h2 style="margin: 0;"><i class="fas fa-history"></i> Recent Expenses</h2>
           <span class="badge badge-danger">Total Spent: ${Utils.fmtTZS(totalExp)}</span>
         </div>
-        <div class="table-responsive">
+        <div class="table-wrapper">
           <table class="data-table">
             <thead>
               <tr>
@@ -131,26 +119,26 @@ const Expenses = {
               ${expenses.length ? expenses.map(e => {
                 const truck = trucks.find(t => t.id === e.truckId);
                 const driver = drivers.find(d => d.id === e.driverId);
-                let paymentDetail = e.method;
+                let paymentDetail = e.method || '---';
                 if (e.method === 'Mobile' && e.mobileProvider) paymentDetail += ` (${e.mobileProvider})`;
                 if (e.method === 'Bank' && e.bank) paymentDetail += ` (${e.bank})`;
 
                 return `
                 <tr>
-                  <td>${Utils.fmtDate(e.date)}</td>
-                  <td>${truck ? Utils.esc(truck.plateNumber) : '---'}</td>
-                  <td>${driver ? Utils.esc(driver.name) : '---'}</td>
-                  <td><span class="badge badge-info">${Utils.esc(e.category)}</span></td>
-                  <td><strong>${Utils.fmtTZS(e.amount)}</strong></td>
-                  <td>${Utils.esc(paymentDetail)}</td>
-                  <td>${Utils.esc(e.description || '---')}</td>
-                  <td>
+                  <td data-label="Date">${Utils.fmtDate(e.date)}</td>
+                  <td data-label="Truck">${truck ? Utils.esc(truck.plateNumber) : '---'}</td>
+                  <td data-label="Driver">${driver ? Utils.esc(driver.name) : '---'}</td>
+                  <td data-label="Category"><span class="badge badge-info">${Utils.esc(e.category)}</span></td>
+                  <td data-label="Amount"><strong>${Utils.fmtTZS(e.amount)}</strong></td>
+                  <td data-label="Payment">${Utils.esc(paymentDetail)}</td>
+                  <td data-label="Description">${Utils.esc(e.description || '---')}</td>
+                  <td data-label="Action">
                     <button class="btn-danger" onclick="Expenses.remove('${e.id}')">
                       <i class="fas fa-trash"></i>
                     </button>
                   </td>
                 </tr>`;
-              }).join('') : '<tr><td colspan="8" style="text-align: center; padding: 40px; color: #64748b;">No expenses recorded yet.</td></tr>'}
+              }).join('') : '<tr><td colspan="8" style="text-align:center; color:#64748b; padding: 30px;">No expenses recorded yet.</td></tr>'}
             </tbody>
           </table>
         </div>
@@ -158,19 +146,16 @@ const Expenses = {
     `;
   },
 
-  // Auto-fill the driver when a truck is selected
   autoFillDriver() {
     const truckSelect = document.getElementById('expTruck');
     const driverInput = document.getElementById('expDriver');
-    
     if (!truckSelect || !driverInput) return;
 
     const selectedOption = truckSelect.options[truckSelect.selectedIndex];
     const driverId = selectedOption.getAttribute('data-driver');
 
     if (driverId) {
-      const drivers = DB.drivers();
-      const driver = drivers.find(d => d.id === driverId);
+      const driver = DB.drivers().find(d => d.id === driverId);
       if (driver) {
         driverInput.value = driver.name;
         driverInput.style.color = '#0f172a';
@@ -186,22 +171,10 @@ const Expenses = {
     }
   },
 
-  // Show/Hide Mobile or Bank dropdowns based on payment method
   togglePaymentDetails() {
     const method = document.getElementById('expMethod').value;
-    const mobileGroup = document.getElementById('mobileProviderGroup');
-    const bankGroup = document.getElementById('bankGroup');
-
-    // Reset visibility
-    mobileGroup.style.display = 'none';
-    bankGroup.style.display = 'none';
-
-    // Show relevant group
-    if (method === 'Mobile') {
-      mobileGroup.style.display = 'block';
-    } else if (method === 'Bank') {
-      bankGroup.style.display = 'block';
-    }
+    document.getElementById('mobileProviderGroup').style.display = method === 'Mobile' ? 'block' : 'none';
+    document.getElementById('bankGroup').style.display = method === 'Bank' ? 'block' : 'none';
   },
 
   save() {
@@ -211,14 +184,12 @@ const Expenses = {
     const amount = Number(document.getElementById('expAmount').value);
     const method = document.getElementById('expMethod').value;
 
-    // Validation
     if (!date) return alert('Please select a date.');
     if (!truckId) return alert('Please select a truck.');
     if (!category) return alert('Please select an expense category.');
     if (!amount || amount <= 0) return alert('Please enter a valid amount greater than 0.');
     if (!method) return alert('Please select a payment method.');
 
-    // Gather conditional payment details
     let mobileProvider = '';
     let bank = '';
     if (method === 'Mobile') {
@@ -230,25 +201,17 @@ const Expenses = {
       if (!bank) return alert('Please select a Bank.');
     }
 
-    // Find the driver ID based on the selected truck (for data consistency)
     const truckSelect = document.getElementById('expTruck');
     const driverId = truckSelect.options[truckSelect.selectedIndex].getAttribute('data-driver') || '';
 
     const expense = {
-      date: date,
-      truckId: truckId,
-      driverId: driverId,
-      category: category,
-      amount: amount,
+      date, truckId, driverId, category, amount,
       description: document.getElementById('expDesc').value,
-      method: method,
-      mobileProvider: mobileProvider,
-      bank: bank
+      method, mobileProvider, bank
     };
 
     DB.push('expenses', expense);
     
-    // Reset form partially for convenience
     document.getElementById('expAmount').value = '';
     document.getElementById('expDesc').value = '';
     document.getElementById('expMethod').value = '';
