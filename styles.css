@@ -397,3 +397,72 @@ button, input, select, a { min-height: 44px; min-width: 44px; }
   .main-content { margin: 0 !important; padding: 0 !important; }
   .form-section, .kpi-card, .chart-box { box-shadow: none; border: 1px solid #ddd; break-inside: avoid; }
 }
+
+/* Fix date input overflow on mobile */
+input[type="date"] {
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 16px; /* Prevents zoom on iOS */
+  padding: 11px 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Ensure form groups don't overflow */
+.form-group {
+  min-width: 0; /* Allows flex children to shrink */
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* Ensure form rows handle overflow */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* On larger screens, use multi-column */
+@media (min-width: 768px) {
+  .form-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .form-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Ensure all inputs respect container width */
+.input-field,
+select.input-field,
+input[type="text"],
+input[type="number"],
+input[type="date"],
+select {
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  display: block;
+}
+
+/* Fix for webkit date inputs */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  padding: 4px;
+}
+
+/* Ensure cards/containers don't overflow */
+.form-section,
+.card,
+.kpi-card {
+  max-width: 100%;
+  overflow: hidden;
+  word-wrap: break-word;
+}
