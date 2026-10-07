@@ -557,3 +557,26 @@ img, svg, canvas, video {
   max-width: 100%;
   height: auto;
 }
+
+/* Leaflet Map Customization */
+.leaflet-popup-content-wrapper {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.leaflet-popup-content {
+  margin: 12px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.custom-truck-marker {
+  transition: transform 0.2s;
+}
+
+.custom-truck-marker:hover {
+  transform: scale(1.1);
+}
+
+.leaflet-container {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
