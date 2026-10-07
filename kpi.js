@@ -7,7 +7,12 @@ const KPI = {
     const totalRev = income.reduce((s, x) => s + Number(x.amount || 0), 0);
     const totalExp = expenses.reduce((s, x) => s + Number(x.amount || 0), 0);
     const totalKm  = trips.reduce((s, x) => s + Number(x.distance || 0), 0);
-    const totalFuel = expenses.filter(e => e.category === 'Fuel').reduce((s, x) => s + Number(x.liters || 0), 0);
+    
+    // Fix: Check for both fuel category variations
+    const totalFuel = expenses.filter(e => 
+      e.category === 'Fuel (Diesel/Petrol)' || e.category === 'Fuel'
+    ).reduce((s, x) => s + Number(x.liters || 0), 0);
+    
     const avgEco = totalFuel > 0 ? (totalKm / totalFuel).toFixed(2) : '0.00';
     const inTransit = trips.filter(t => t.status === 'In Transit').length;
     const onTime = trips.filter(t => t.status === 'Completed' && t.onTime).length;
@@ -117,8 +122,12 @@ const KPI = {
       const dTrips = trips.filter(t => t.driverId === d.id);
       const km = dTrips.reduce((s, x) => s + Number(x.distance || 0), 0);
       const rev = income.filter(x => x.driverId === d.id).reduce((s, x) => s + Number(x.amount || 0), 0);
-      const fuel = expenses.filter(e => e.driverId === d.id && e.category === 'Fuel')
-                           .reduce((s, x) => s + Number(x.liters || 0), 0);
+      
+      // Fix: Check for both fuel category variations
+      const fuel = expenses.filter(e => 
+        e.driverId === d.id && (e.category === 'Fuel (Diesel/Petrol)' || e.category === 'Fuel')
+      ).reduce((s, x) => s + Number(x.liters || 0), 0);
+      
       const eco = fuel > 0 ? (km / fuel).toFixed(1) : '0.0';
       
       return `<tr>
@@ -179,11 +188,26 @@ const KPI = {
 
   renderFuelChart() {
     const trucks = DB.trucks(), expenses = DB.expenses();
-    const data = trucks.map(t => ({
-      label: t.plateNumber,
-      value: expenses.filter(e => e.truckId === t.id && e.category === 'Fuel')
-                     .reduce((s, x) => s + Number(x.amount || 0), 0)
-    })).filter(d => d.value > 0); // Only show trucks with actual fuel spend
+    
+    // Fix: Check for both fuel category variations and calculate from amount if liters not recorded
+    const DIESEL_PRICE_PER_LITER = 3430; // EWURA standard price
+    
+    const data = trucks.map(t => {
+      const truckFuelExpenses = expenses.filter(e => 
+        e.truckId === t.id && (e.category === 'Fuel (Diesel/Petrol)' || e.category === 'Fuel')
+      );
+      
+      const totalLiters = truckFuelExpenses.reduce((s, x) => s + Number(x.liters || 0), 0);
+      const totalCost = truckFuelExpenses.reduce((s, x) => s + Number(x.amount || 0), 0);
+      
+      // Use recorded liters or calculate from amount
+      const liters = totalLiters > 0 ? totalLiters : (totalCost / DIESEL_PRICE_PER_LITER);
+      
+      return {
+        label: t.plateNumber,
+        value: totalCost
+      };
+    }).filter(d => d.value > 0);
     
     const canvas = document.getElementById('kpiFuelChart');
     if (!canvas) return;
@@ -205,7 +229,16 @@ const KPI = {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { position: 'bottom' } }
+        plugins: { 
+          legend: { position: 'bottom' },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return context.label + ': ' + Utils.fmtTZS(context.parsed);
+              }
+            }
+          }
+        }
       }
     });
   }
