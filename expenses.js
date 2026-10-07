@@ -211,8 +211,10 @@ const Expenses = {
     };
 
     DB.push('expenses', expense);
-logActivity({ module: 'expenses', action: 'create', description: `Expense ${expense.category}: ${Utils.fmtTZS(expense.amount)}`, ref: expense.truckId, user: 'admin' });
-alert('Expense recorded successfully!');
+    
+    if (typeof logActivity === 'function') {
+      logActivity({ module: 'expenses', action: 'create', description: `Expense ${expense.category}: ${Utils.fmtTZS(expense.amount)}`, ref: expense.truckId, user: 'admin' });
+    }
     
     document.getElementById('expAmount').value = '';
     document.getElementById('expDesc').value = '';
@@ -225,9 +227,11 @@ alert('Expense recorded successfully!');
 
   remove(id) {
     if (confirm('Are you sure you want to delete this expense record? This cannot be undone.')) {
-     DB.remove('expenses', id);
-logActivity({ module: 'expenses', action: 'delete', description: `Deleted expense ${id}`, ref: id, user: 'admin' });
-App.refresh();
+      DB.remove('expenses', id);
+      if (typeof logActivity === 'function') {
+        logActivity({ module: 'expenses', action: 'delete', description: `Deleted expense ${id}`, ref: id, user: 'admin' });
+      }
+      App.refresh();
     }
   }
 };
