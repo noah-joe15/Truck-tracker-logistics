@@ -301,8 +301,8 @@ const TripOps = {
     };
 
     DB.push('trucks', truck);
-    alert(`Truck "${plate}" added successfully with ${trailerCount} trailer(s)!`);
-    App.refresh();
+logActivity({ module: 'trucks', action: 'create', description: `Added truck ${truck.plateNumber}`, ref: truck.plateNumber, user: 'admin' });
+alert(`Truck "${plate}" added successfully...`);
   },
 
   // ======================== ADD DRIVER ========================
@@ -319,8 +319,8 @@ const TripOps = {
     };
 
     DB.push('drivers', d);
-    alert(`Driver "${name}" added successfully!`);
-    App.refresh();
+logActivity({ module: 'drivers', action: 'create', description: `Added driver ${d.name}`, ref: d.name, user: 'admin' });
+alert(`Driver "${name}" added successfully!`);
   },
 
   // ======================== ADD CUSTOMER ========================
@@ -335,8 +335,8 @@ const TripOps = {
     };
 
     DB.push('customers', c);
-    alert(`Customer "${name}" added successfully!`);
-    App.refresh();
+logActivity({ module: 'customers', action: 'create', description: `Added customer ${c.name}`, ref: c.name, user: 'admin' });
+alert(`Customer "${name}" added successfully!`);
   },
 
   // ======================== TRIP LOGIC ========================
@@ -466,6 +466,8 @@ const TripOps = {
     if (!trip.from || !trip.to) return alert('Please select both Origin and Destination regions.');
 
     DB.push('trips', trip);
+logActivity({ module: 'trips', action: 'create', description: `Trip ${trip.from} → ${trip.to}`, ref: trip.truckId, user: 'admin' });
+if (paidAmount > 0) { ... }
 
     if (paidAmount > 0) {
       DB.push('income', {
@@ -494,7 +496,8 @@ const TripOps = {
   deleteTrip(id) {
     if (confirm('Delete this trip? Note: This will NOT automatically reverse associated income or debt records.')) {
       DB.remove('trips', id);
-      App.refresh();
+logActivity({ module: 'trips', action: 'delete', description: `Deleted trip ${id}`, ref: id, user: 'admin' });
+App.refresh();
     }
   }
 };
