@@ -24,14 +24,17 @@ const Auth = {
 
     if (user === stored.user && pass === stored.pass) {
       localStorage.setItem('iltm_logged_in', '1');
-      App.showApp(); // This hides login and shows the dashboard
+logActivity({ module: 'auth', action: 'login', description: 'User logged in', user: user });
+App.showApp();
     } else {
       alert('Invalid credentials.\n\nDefault Login:\nUsername: admin\nPassword: admin');
     }
   },
 
   logout() {
-    localStorage.removeItem('iltm_logged_in');
-    location.reload();
+  logActivity({ module: 'auth', action: 'logout', description: 'User logged out', user: 'admin' });
+  localStorage.removeItem('iltm_logged_in');
+  location.reload();
+}
   }
 };
