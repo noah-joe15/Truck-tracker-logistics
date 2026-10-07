@@ -118,13 +118,15 @@ const Compliance = {
     };
     if (!rec.truckId || !rec.expiry) return alert('Truck and expiry date are required.');
     DB.push('compliance', rec);
-    App.refresh();
+logActivity({ module: 'compliance', action: 'create', description: `Added ${rec.category} for truck`, ref: rec.truckId, user: 'admin' });
+App.refresh();
   },
 
   remove(id) {
     if (confirm('Delete this compliance record?')) {
       DB.remove('compliance', id);
-      App.refresh();
+logActivity({ module: 'compliance', action: 'delete', description: `Deleted compliance record ${id}`, ref: id, user: 'admin' });
+App.refresh();
     }
   }
 };
