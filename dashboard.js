@@ -1,15 +1,26 @@
 const Dashboard = {
   render() {
-    const trucks    = DB.trucks();
-    const trips     = DB.trips();
-    const expenses  = DB.expenses();
-    const income    = DB.income();
-    const debts     = DB.debts();
+    const trucks = DB.trucks();
+    const trips = DB.trips();
+    const expenses = DB.expenses();
+    const income = DB.income();
+    const debts = DB.debts();
 
-    const totalIncome   = income.reduce((s, x) => s + Number(x.amount || 0), 0);
-    const totalExpense  = expenses.reduce((s, x) => s + Number(x.amount || 0), 0);
-    const pendingDebt   = debts.filter(d => !d.paid).reduce((s, x) => s + Number(x.amount || 0), 0);
-    const cashInHand    = totalIncome - totalExpense;
+    const totalIncome = income.reduce((s, x) => s + Number(x.amount || 0), 0);
+    const totalExpense = expenses.reduce((s, x) => s + Number(x.amount || 0), 0);
+    const pendingDebt = debts.filter(d => !d.paid).reduce((s, x) => s + Number(x.amount || 0), 0);
+    const cashInHand = totalIncome - totalExpense;
+
+    // Fuel Analysis
+    const fuelExpenses = expenses.filter(e => e.category === 'Fuel (Diesel/Petrol)' || e.category === 'Fuel');
+    const totalFuelCost = fuelExpenses.reduce((s, x) => s + Number(x.amount || 0), 0);
+    const totalFuelLiters = fuelExpenses.reduce((s, x) => s + Number(x.liters || 0), 0);
+    
+    // EWURA Standard Diesel Price per Liter (Tanzania) - Update this as needed
+    const DIESEL_PRICE_PER_LITER = 3430; // TZS per liter (EWURA standard price)
+    
+    // If liters not recorded, calculate from amount
+    const calculatedLiters = totalFuelLiters > 0 ? totalFuelLiters : (totalFuelCost / DIESEL_PRICE_PER_LITER);
 
     return `
       <h1 class="section-title">${Icons.truck} Fleet Overview</h1>
@@ -48,11 +59,26 @@ const Dashboard = {
       </div>
 
       <div class="form-section">
-        <h2>${Icons.warning} Maintenance Required</h2>
-        <p style="color:#64748b; margin-bottom: 12px; font-size: 14px;">Quick Service Action:</p>
-        <div class="form-row" style="grid-template-columns: 1fr auto; align-items: end;">
-          <select id="serviceTruck" class="input-field">${Utils.optionsHTML(trucks, 'plateNumber', 'id', 'Select Truck...')}</select>
-          <button class="btn-success" onclick="Dashboard.markServiceDone()" style="margin-top:0; width:auto;">Mark Service Done</button>
+        <h2>${Icons.fuel} Fuel Analysis</h2>
+        <p style="color:#64748b; margin-bottom: 16px; font-size: 14px;">
+          Total Fuel Used: <strong>${calculatedLiters.toFixed(1)} L</strong> | 
+          Total Fuel Cost: <strong>${Utils.fmtTZS(totalFuelCost)}</strong> |
+          EWURA Price: <strong>${Utils.fmtTZS(DIESEL_PRICE_PER_LITER)}/L</strong>
+        </p>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Truck</th>
+                <th>Fuel Used (L)</th>
+                <th>Fuel Cost (TZS)</th>
+                <th>% of Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${this.fuelRows(trucks, fuelExpenses, calculatedLiters, DIESEL_PRICE_PER_LITER)}
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -60,36 +86,56 @@ const Dashboard = {
         <h2>${Icons.activity} Fleet Performance</h2>
         <div class="table-wrapper">
           <table class="data-table">
-            <thead><tr><th>Truck</th><th>Profit</th><th>Eco (Km/L)</th><th>Service Status</th><th>Action</th></tr></thead>
+            <thead>
+              <tr>
+                <th>Truck</th>
+                <th>Profit</th>
+                <th>Eco (Km/L)</th>
+                <th>Service Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
             <tbody>${this.fleetRows(trucks, trips, expenses, income)}</tbody>
-          </table>
-        </div>
-      </div>
-      
-      <div class="form-section">
-        <h2>${Icons.fuel} Fuel Analysis</h2>
-        <p style="color:#64748b; margin-bottom: 12px; font-size: 14px;">
-          Total Fuel Used: <b>${Utils.fmtNum(this.totalFuel())} L</b> | 
-          Total Fuel Cost: <b>${Utils.fmtTZS(this.totalFuelCost(expenses))}</b>
-        </p>
-        <div class="table-wrapper">
-          <table class="data-table">
-            <thead><tr><th>Truck</th><th>Fuel Used (L)</th><th>Fuel Cost (TZS)</th><th>% of Total</th></tr></thead>
-            <tbody>${this.fuelRows(trucks, trips, expenses)}</tbody>
           </table>
         </div>
       </div>
     `;
   },
 
+  fuelRows(trucks, fuelExpenses, totalLiters, pricePerLiter) {
+    if (!trucks.length) {
+      return '<tr><td colspan="4" style="text-align:center; color:#64748b; padding: 30px;">No trucks added yet.</td></tr>';
+    }
+
+    return trucks.map(t => {
+      const truckFuelExpenses = fuelExpenses.filter(e => e.truckId === t.id);
+      const truckFuelCost = truckFuelExpenses.reduce((s, x) => s + Number(x.amount || 0), 0);
+      const truckLiters = truckFuelExpenses.reduce((s, x) => s + Number(x.liters || 0), 0);
+      
+      // Calculate liters from amount if not recorded
+      const calculatedLiters = truckLiters > 0 ? truckLiters : (truckFuelCost / pricePerLiter);
+      const percentage = totalLiters > 0 ? ((calculatedLiters / totalLiters) * 100).toFixed(1) : 0;
+
+      return `<tr>
+        <td data-label="Truck">${Utils.esc(t.plateNumber)}</td>
+        <td data-label="Fuel Used (L)">${calculatedLiters.toFixed(1)}</td>
+        <td data-label="Fuel Cost (TZS)">${Utils.fmtTZS(truckFuelCost)}</td>
+        <td data-label="% of Total">${percentage}%</td>
+      </tr>`;
+    }).join('');
+  },
+
   fleetRows(trucks, trips, expenses, income) {
-    if (!trucks.length) return '<tr><td colspan="5" style="text-align:center;color:#64748b; padding: 20px;">No trucks yet</td></tr>';
+    if (!trucks.length) {
+      return '<tr><td colspan="5" style="text-align:center; color:#64748b; padding: 30px;">No trucks added yet.</td></tr>';
+    }
+    
     return trucks.map(t => {
       const tTrips = trips.filter(x => x.truckId === t.id);
       const rev = income.filter(x => x.truckId === t.id).reduce((s, x) => s + Number(x.amount || 0), 0);
       const exp = expenses.filter(x => x.truckId === t.id).reduce((s, x) => s + Number(x.amount || 0), 0);
-      const km  = tTrips.reduce((s, x) => s + Number(x.distance || 0), 0);
-      const fuel = expenses.filter(x => x.truckId === t.id && x.category === 'Fuel')
+      const km = tTrips.reduce((s, x) => s + Number(x.distance || 0), 0);
+      const fuel = expenses.filter(x => x.truckId === t.id && (x.category === 'Fuel (Diesel/Petrol)' || x.category === 'Fuel'))
                            .reduce((s, x) => s + Number(x.liters || 0), 0);
       const eco = fuel > 0 ? (km / fuel).toFixed(1) : '0.0';
       
@@ -104,30 +150,13 @@ const Dashboard = {
   },
 
   totalFuel() {
-    return DB.expenses().filter(e => e.category === 'Fuel').reduce((s, x) => s + Number(x.liters || 0), 0);
+    return DB.expenses().filter(e => e.category === 'Fuel (Diesel/Petrol)' || e.category === 'Fuel')
+      .reduce((s, x) => s + Number(x.liters || 0), 0);
   },
   
   totalFuelCost(expenses) {
-    return expenses.filter(e => e.category === 'Fuel').reduce((s, x) => s + Number(x.amount || 0), 0);
-  },
-  
-  fuelRows(trucks, trips, expenses) {
-    const total = this.totalFuel();
-    if (!trucks.length) return '<tr><td colspan="4" style="text-align:center;color:#64748b; padding: 20px;">No trucks yet</td></tr>';
-    return trucks.map(t => {
-      const liters = expenses.filter(e => e.truckId === t.id && e.category === 'Fuel')
-                             .reduce((s, x) => s + Number(x.liters || 0), 0);
-      const cost = expenses.filter(e => e.truckId === t.id && e.category === 'Fuel')
-                           .reduce((s, x) => s + Number(x.amount || 0), 0);
-      const pct = total > 0 ? ((liters / total) * 100).toFixed(1) : 0;
-      
-      return `<tr>
-        <td data-label="Truck">${Utils.esc(t.plateNumber)}</td>
-        <td data-label="Fuel Used (L)">${liters.toFixed(1)}</td>
-        <td data-label="Fuel Cost (TZS)">${Utils.fmtTZS(cost)}</td>
-        <td data-label="% of Total">${pct}%</td>
-      </tr>`;
-    }).join('');
+    return expenses.filter(e => e.category === 'Fuel (Diesel/Petrol)' || e.category === 'Fuel')
+      .reduce((s, x) => s + Number(x.amount || 0), 0);
   },
 
   markServiceDone() {
