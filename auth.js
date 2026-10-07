@@ -1,12 +1,10 @@
 const Auth = {
   init() {
-    // Attach click event to the login button
     const loginBtn = document.getElementById('loginBtn');
     if (loginBtn) {
       loginBtn.addEventListener('click', () => this.login());
     }
     
-    // Allow pressing "Enter" key to login
     const loginPass = document.getElementById('loginPass');
     if (loginPass) {
       loginPass.addEventListener('keypress', (e) => {
@@ -18,23 +16,24 @@ const Auth = {
   login() {
     const user = document.getElementById('loginUser').value.trim();
     const pass = document.getElementById('loginPass').value;
-
-    // Default credentials (you can change these later)
     const stored = DB.get('credentials', { user: 'admin', pass: 'admin' });
 
     if (user === stored.user && pass === stored.pass) {
       localStorage.setItem('iltm_logged_in', '1');
-logActivity({ module: 'auth', action: 'login', description: 'User logged in', user: user });
-App.showApp();
+      if (typeof logActivity === 'function') {
+        logActivity({ module: 'auth', action: 'login', description: 'User logged in', user: user });
+      }
+      App.showApp();
     } else {
       alert('Invalid credentials.\n\nDefault Login:\nUsername: admin\nPassword: admin');
     }
   },
 
   logout() {
-  logActivity({ module: 'auth', action: 'logout', description: 'User logged out', user: 'admin' });
-  localStorage.removeItem('iltm_logged_in');
-  location.reload();
-}
+    if (typeof logActivity === 'function') {
+      logActivity({ module: 'auth', action: 'logout', description: 'User logged out', user: 'admin' });
+    }
+    localStorage.removeItem('iltm_logged_in');
+    location.reload();
   }
 };
