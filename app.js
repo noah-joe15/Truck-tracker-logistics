@@ -79,8 +79,9 @@ const App = {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `malibora-backup-${Utils.today()}.json`;
-    a.click();
+   a.download = `malibora-backup-${Utils.today()}.json`;
+a.click();
+logActivity({ module: 'system', action: 'export', description: 'Downloaded full backup', ref: 'backup.json', user: 'admin' });
   },
 
   importBackup(e) {
