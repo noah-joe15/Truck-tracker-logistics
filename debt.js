@@ -128,13 +128,16 @@ const Debt = {
       return alert('Customer and amount are required.');
     }
     
-    DB.push('debts', d);
-    DB.push('income', { ...d, type: 'Debt Payment' });
-    App.refresh();
+   DB.push('debts', d);
+logActivity({ module: 'debts', action: 'create', description: `Debt payment ${Utils.fmtTZS(d.amount)}`, ref: d.customerId, user: 'admin' });
+DB.push('income', { ...d, type: 'Debt Payment' });
+App.refresh();
   },
 
-  markPaid(id) { 
-    DB.update('debts', id, { paid: true }); 
-    App.refresh(); 
+  markPaid(id) {
+  DB.update('debts', id, { paid: true });
+  logActivity({ module: 'debts', action: 'update', description: `Marked debt ${id} as paid`, ref: id, user: 'admin' });
+  App.refresh();
+} 
   }
 };
