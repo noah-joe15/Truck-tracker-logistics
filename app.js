@@ -3,10 +3,11 @@ const App = {
     dashboard:  Dashboard,
     kpi:        KPI,
     map:        MapView,
-    history:    { render: () => TripOps.render() }, 
+    history:    History,
     analytics:  Analytics,
     debt:       Debt,
-    operations: TripOps,  
+    operations: TripOps,
+    expenses:   Expenses,
     compliance: Compliance,
     settings:   { render: () => App.settingsView() }
   },
@@ -79,9 +80,11 @@ const App = {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-   a.download = `malibora-backup-${Utils.today()}.json`;
-a.click();
-logActivity({ module: 'system', action: 'export', description: 'Downloaded full backup', ref: 'backup.json', user: 'admin' });
+    a.download = `malibora-backup-${Utils.today()}.json`;
+    a.click();
+    if (typeof logActivity === 'function') {
+      logActivity({ module: 'system', action: 'export', description: 'Downloaded full backup', ref: 'backup.json', user: 'admin' });
+    }
   },
 
   importBackup(e) {
@@ -109,9 +112,6 @@ logActivity({ module: 'system', action: 'export', description: 'Downloaded full 
   }
 };
 
-// =========================================================
-// INITIALIZATION & MOBILE MENU TOGGLE
-// =========================================================
 document.addEventListener('DOMContentLoaded', () => {
   App.init();
 
