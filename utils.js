@@ -99,3 +99,43 @@ const Utils = {
     return `<span class="badge badge-${map[status] || 'info'}">${Utils.esc(status)}</span>`;
   }
 };
+
+// =====================================================
+// ACTIVITY LOGGING — global function
+// =====================================================
+const ActivityLog = {
+  KEY: 'iltm_activity_log',
+  MAX: 5000,
+
+  _read() {
+    try { return JSON.parse(localStorage.getItem(this.KEY)) || []; }
+    catch { return []; }
+  },
+  _write(list) {
+    // keep newest first, cap at MAX
+    const trimmed = list.slice(0, this.MAX);
+    localStorage.setItem(this.KEY, JSON.stringify(trimmed));
+  },
+
+  log({ module, action, description, ref, user }) {
+    const entry = {
+      id: 'act_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+      ts: new Date().toISOString(),
+      module: module || 'system',
+      action: action || 'update',
+      description: String(description || '').trim(),
+      ref: ref || '',
+      user: user || 'admin'
+    };
+    const list = this._read();
+    list.unshift(entry);
+    this._write(list);
+  },
+
+  all() { return this._read(); },
+
+  clear() { localStorage.removeItem(this.KEY); }
+};
+
+// Shorthand
+const logActivity = (opts) => ActivityLog.log(opts);
