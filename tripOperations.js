@@ -467,7 +467,7 @@ alert(`Customer "${name}" added successfully!`);
 
     DB.push('trips', trip);
 logActivity({ module: 'trips', action: 'create', description: `Trip ${trip.from} → ${trip.to}`, ref: trip.truckId, user: 'admin' });
-if (paidAmount > 0) { ... }
+if (paidAmount > 0)
 
     if (paidAmount > 0) {
       DB.push('income', {
