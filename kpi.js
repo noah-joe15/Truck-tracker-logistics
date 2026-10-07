@@ -8,10 +8,18 @@ const KPI = {
     const totalExp = expenses.reduce((s, x) => s + Number(x.amount || 0), 0);
     const totalKm  = trips.reduce((s, x) => s + Number(x.distance || 0), 0);
     
-    // Fix: Check for both fuel category variations
-    const totalFuel = expenses.filter(e => 
+    // EWURA Diesel Price
+    const DIESEL_PRICE = 3430;
+    
+    // Fix: Check for both fuel category variations AND calculate liters from amount if not recorded
+    const fuelExpenses = expenses.filter(e => 
       e.category === 'Fuel (Diesel/Petrol)' || e.category === 'Fuel'
-    ).reduce((s, x) => s + Number(x.liters || 0), 0);
+    );
+    
+    const totalFuel = fuelExpenses.reduce((s, x) => {
+      const liters = Number(x.liters || 0);
+      return s + (liters > 0 ? liters : (Number(x.amount || 0) / DIESEL_PRICE));
+    }, 0);
     
     const avgEco = totalFuel > 0 ? (totalKm / totalFuel).toFixed(2) : '0.00';
     const inTransit = trips.filter(t => t.status === 'In Transit').length;
@@ -90,7 +98,7 @@ const KPI = {
                 <th>Status</th>
               </tr>
             </thead>
-            <tbody>${this.driverRows(drivers, trucks, trips, income, expenses)}</tbody>
+            <tbody>${this.driverRows(drivers, trucks, trips, income, expenses, DIESEL_PRICE)}</tbody>
           </table>
         </div>
       </div>
@@ -112,7 +120,7 @@ const KPI = {
     `;
   },
 
-  driverRows(drivers, trucks, trips, income, expenses) {
+  driverRows(drivers, trucks, trips, income, expenses, dieselPrice) {
     if (!drivers.length) {
       return '<tr><td colspan="8" style="text-align:center; color:#64748b; padding: 30px;">No drivers assigned yet. Add drivers in the Drivers section.</td></tr>';
     }
@@ -123,10 +131,19 @@ const KPI = {
       const km = dTrips.reduce((s, x) => s + Number(x.distance || 0), 0);
       const rev = income.filter(x => x.driverId === d.id).reduce((s, x) => s + Number(x.amount || 0), 0);
       
-      // Fix: Check for both fuel category variations
-      const fuel = expenses.filter(e => 
-        e.driverId === d.id && (e.category === 'Fuel (Diesel/Petrol)' || e.category === 'Fuel')
-      ).reduce((s, x) => s + Number(x.liters || 0), 0);
+      // Fix: Check fuel by driverId OR by truckId (if truck is assigned to this driver)
+      const driverFuelExpenses = expenses.filter(e => {
+        const isFuel = e.category === 'Fuel (Diesel/Petrol)' || e.category === 'Fuel';
+        const byDriver = e.driverId === d.id;
+        const byTruck = truck && e.truckId === truck.id;
+        return isFuel && (byDriver || byTruck);
+      });
+      
+      // Calculate total fuel liters (use recorded liters OR calculate from amount)
+      const fuel = driverFuelExpenses.reduce((s, x) => {
+        const liters = Number(x.liters || 0);
+        return s + (liters > 0 ? liters : (Number(x.amount || 0) / dieselPrice));
+      }, 0);
       
       const eco = fuel > 0 ? (km / fuel).toFixed(1) : '0.0';
       
@@ -188,20 +205,14 @@ const KPI = {
 
   renderFuelChart() {
     const trucks = DB.trucks(), expenses = DB.expenses();
-    
-    // Fix: Check for both fuel category variations and calculate from amount if liters not recorded
-    const DIESEL_PRICE_PER_LITER = 3430; // EWURA standard price
+    const DIESEL_PRICE = 3430;
     
     const data = trucks.map(t => {
       const truckFuelExpenses = expenses.filter(e => 
         e.truckId === t.id && (e.category === 'Fuel (Diesel/Petrol)' || e.category === 'Fuel')
       );
       
-      const totalLiters = truckFuelExpenses.reduce((s, x) => s + Number(x.liters || 0), 0);
       const totalCost = truckFuelExpenses.reduce((s, x) => s + Number(x.amount || 0), 0);
-      
-      // Use recorded liters or calculate from amount
-      const liters = totalLiters > 0 ? totalLiters : (totalCost / DIESEL_PRICE_PER_LITER);
       
       return {
         label: t.plateNumber,
