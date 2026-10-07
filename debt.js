@@ -98,7 +98,6 @@ const Debt = {
     if (!debts.length) {
       return '<tr><td colspan="6" style="text-align:center; color:#64748b; padding: 30px;">No debt records yet.</td></tr>';
     }
-    
     return debts.map(d => {
       const c = customers.find(x => x.id === d.customerId);
       return `<tr>
@@ -128,16 +127,29 @@ const Debt = {
       return alert('Customer and amount are required.');
     }
     
-   DB.push('debts', d);
-logActivity({ module: 'debts', action: 'create', description: `Debt payment ${Utils.fmtTZS(d.amount)}`, ref: d.customerId, user: 'admin' });
-DB.push('income', { ...d, type: 'Debt Payment' });
-App.refresh();
+    DB.push('debts', d);
+    
+    if (typeof logActivity === 'function') {
+      logActivity({ module: 'debts', action: 'create', description: `Debt payment ${Utils.fmtTZS(d.amount)}`, ref: d.customerId, user: 'admin' });
+    }
+    
+    DB.push('income', {
+      date: d.date,
+      customerId: d.customerId,
+      amount: d.amount,
+      method: d.method,
+      description: 'Debt Payment: ' + (d.description || ''),
+      type: 'Debt Payment'
+    });
+    
+    App.refresh();
   },
 
   markPaid(id) {
-  DB.update('debts', id, { paid: true });
-  logActivity({ module: 'debts', action: 'update', description: `Marked debt ${id} as paid`, ref: id, user: 'admin' });
-  App.refresh();
-} 
+    DB.update('debts', id, { paid: true });
+    if (typeof logActivity === 'function') {
+      logActivity({ module: 'debts', action: 'update', description: `Marked debt ${id} as paid`, ref: id, user: 'admin' });
+    }
+    App.refresh();
   }
 };
