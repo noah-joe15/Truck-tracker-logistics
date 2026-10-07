@@ -2,7 +2,7 @@ const MapView = {
   map: null,
   markers: {},
 
-  render() {
+    render() {
     const trips = DB.trips().filter(t => t.status === 'In Transit');
     const trucks = DB.trucks();
     const drivers = DB.drivers();
@@ -12,8 +12,8 @@ const MapView = {
         <h2><i class="fas fa-map-marked-alt"></i> Live Map -- Active Fleet Routes</h2>
       </div>
       
-      <div class="form-section" style="padding: 0; overflow: hidden;">
-        <div id="map" style="height: 600px; width: 100%;"></div>
+      <div class="form-section" style="padding: 0; overflow: hidden; position: relative;">
+        <div id="map" style="height: 600px; width: 100%; position: relative; z-index: 1;"></div>
       </div>
       
       <div class="form-section" style="margin-top: 20px;">
@@ -67,92 +67,105 @@ const MapView = {
   },
 
   initMap() {
-    // Initialize map centered on Tanzania
-    this.map = L.map('map').setView([-6.369028, 34.888822], 6);
-    
-    // Add OpenStreetMap tile layer
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
-      maxZoom: 19
-    }).addTo(this.map);
-
-    // Add markers for active trips
-    const trips = DB.trips().filter(t => t.status === 'In Transit');
-    const trucks = DB.trucks();
-    const drivers = DB.drivers();
-
-    trips.forEach((trip, index) => {
-      const truck = trucks.find(t => t.id === trip.truckId);
-      const driver = drivers.find(d => d.id === trip.driverId);
+    // Wait for DOM to be ready
+    setTimeout(() => {
+      // Initialize map centered on Tanzania
+      this.map = L.map('map', {
+        zoomControl: true,
+        attributionControl: true
+      }).setView([-6.369028, 34.888822], 6);
       
-      // Get coordinates for from and to locations
-      const fromCoords = this.getRegionCoords(trip.from);
-      const toCoords = this.getRegionCoords(trip.to);
-      
-      if (fromCoords && toCoords) {
-        // Create a custom icon for the truck
-        const truckIcon = L.divIcon({
-          className: 'custom-truck-marker',
-          html: `<div style="
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 3px solid white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-          "><i class="fas fa-truck" style="color: white; font-size: 18px;"></i></div>`,
-          iconSize: [40, 40],
-          iconAnchor: [20, 20]
-        });
-
-        // Add marker at starting location (or midpoint for simulation)
-        const midLat = (fromCoords.lat + toCoords.lat) / 2;
-        const midLon = (fromCoords.lon + toCoords.lon) / 2;
-        
-        const marker = L.marker([midLat, midLon], { icon: truckIcon }).addTo(this.map);
-        
-        // Add popup with truck info
-        const popupContent = `
-          <div style="min-width: 200px;">
-            <h4 style="margin: 0 0 8px 0; color: var(--primary-dark);">${truck ? Utils.esc(truck.plateNumber) : 'Unknown Truck'}</h4>
-            <div style="font-size: 13px;">
-              <div><i class="fas fa-user" style="color: var(--primary);"></i> ${driver ? Utils.esc(driver.name) : 'Unknown Driver'}</div>
-              <div style="margin-top: 4px;"><i class="fas fa-route" style="color: var(--primary);"></i> ${Utils.esc(trip.from)} → ${Utils.esc(trip.to)}</div>
-              <div style="margin-top: 4px;"><i class="fas fa-tachometer-alt" style="color: var(--primary);"></i> ${Utils.fmtNum(trip.distance || 0)} km</div>
-              <div style="margin-top: 4px;"><i class="fas fa-info-circle" style="color: var(--primary);"></i> ${Utils.statusBadge(trip.status)}</div>
-            </div>
-          </div>
-        `;
-        
-        marker.bindPopup(popupContent);
-        this.markers[trip.id] = marker;
-
-        // Draw route line
-        const routeLine = L.polyline([
-          [fromCoords.lat, fromCoords.lon],
-          [toCoords.lat, toCoords.lon]
-        ], {
-          color: '#3b82f6',
-          weight: 3,
-          opacity: 0.7,
-          dashArray: '10, 10'
-        }).addTo(this.map);
-
-        // Fit bounds to show all markers
-        if (trips.length > 0) {
-          const group = new L.featureGroup([marker, routeLine]);
-          this.map.fitBounds(group.getBounds().pad(0.1));
+      // Fix map size after initialization
+      setTimeout(() => {
+        if (this.map) {
+          this.map.invalidateSize();
         }
-      }
-    });
+      }, 200);
+      
+      // Add OpenStreetMap tile layer
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+      }).addTo(this.map);
 
-    // If no active trips, show Tanzania
-    if (trips.length === 0) {
-      this.map.setView([-6.369028, 34.888822], 6);
-    }
+      // Add markers for active trips
+      const trips = DB.trips().filter(t => t.status === 'In Transit');
+      const trucks = DB.trucks();
+      const drivers = DB.drivers();
+
+      trips.forEach((trip, index) => {
+        const truck = trucks.find(t => t.id === trip.truckId);
+        const driver = drivers.find(d => d.id === trip.driverId);
+        
+        // Get coordinates for from and to locations
+        const fromCoords = this.getRegionCoords(trip.from);
+        const toCoords = this.getRegionCoords(trip.to);
+        
+        if (fromCoords && toCoords) {
+          // Create a custom icon for the truck
+          const truckIcon = L.divIcon({
+            className: 'custom-truck-marker',
+            html: `<div style="
+              background: linear-gradient(135deg, var(--primary), var(--primary-light));
+              width: 40px;
+              height: 40px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border: 3px solid white;
+              box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            "><i class="fas fa-truck" style="color: white; font-size: 18px;"></i></div>`,
+            iconSize: [40, 40],
+            iconAnchor: [20, 20]
+          });
+
+          // Add marker at starting location (or midpoint for simulation)
+          const midLat = (fromCoords.lat + toCoords.lat) / 2;
+          const midLon = (fromCoords.lon + toCoords.lon) / 2;
+          
+          const marker = L.marker([midLat, midLon], { icon: truckIcon }).addTo(this.map);
+          
+          // Add popup with truck info
+          const popupContent = `
+            <div style="min-width: 200px;">
+              <h4 style="margin: 0 0 8px 0; color: var(--primary-dark);">${truck ? Utils.esc(truck.plateNumber) : 'Unknown Truck'}</h4>
+              <div style="font-size: 13px;">
+                <div><i class="fas fa-user" style="color: var(--primary);"></i> ${driver ? Utils.esc(driver.name) : 'Unknown Driver'}</div>
+                <div style="margin-top: 4px;"><i class="fas fa-route" style="color: var(--primary);"></i> ${Utils.esc(trip.from)} → ${Utils.esc(trip.to)}</div>
+                <div style="margin-top: 4px;"><i class="fas fa-tachometer-alt" style="color: var(--primary);"></i> ${Utils.fmtNum(trip.distance || 0)} km</div>
+                <div style="margin-top: 4px;"><i class="fas fa-info-circle" style="color: var(--primary);"></i> ${Utils.statusBadge(trip.status)}</div>
+              </div>
+            </div>
+          `;
+          
+          marker.bindPopup(popupContent);
+          this.markers[trip.id] = marker;
+
+          // Draw route line
+          const routeLine = L.polyline([
+            [fromCoords.lat, fromCoords.lon],
+            [toCoords.lat, toCoords.lon]
+          ], {
+            color: '#3b82f6',
+            weight: 3,
+            opacity: 0.7,
+            dashArray: '10, 10'
+          }).addTo(this.map);
+
+          // Fit bounds to show all markers
+          if (trips.length > 0) {
+            const group = new L.featureGroup([marker, routeLine]);
+            this.map.fitBounds(group.getBounds().pad(0.1));
+          }
+        }
+      });
+
+      // If no active trips, show Tanzania
+      if (trips.length === 0) {
+        this.map.setView([-6.369028, 34.888822], 6);
+      }
+    }, 100);
   },
 
   getRegionCoords(regionName) {
