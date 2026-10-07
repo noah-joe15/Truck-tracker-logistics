@@ -1,13 +1,10 @@
 // ============================================================
 // TRIP OPERATIONS MODULE
-// Handles: Trips, Trucks, Drivers, Customers
-// Communicates with the rest of the system via DB object
 // ============================================================
 
 const TripOps = {
   brands: ['Scania', 'Howo', 'Fuso', 'Renault', 'Mercedes', 'Canter', 'Volvo', 'MAN'],
 
-  // ======================== RENDER ========================
   render() {
     const trucks = DB.trucks();
     const drivers = DB.drivers();
@@ -256,7 +253,6 @@ const TripOps = {
     `;
   },
 
-  // ======================== TRAILER PLATES ========================
   renderTrailerPlates() {
     const count = Number(document.getElementById('truckTrailersCount').value) || 0;
     const container = document.getElementById('trailerPlatesContainer');
@@ -277,7 +273,6 @@ const TripOps = {
     container.innerHTML = html;
   },
 
-  // ======================== ADD TRUCK ========================
   addTruck() {
     const plate = document.getElementById('truckPlate').value.trim();
     if (!plate) return alert('Truck plate number is required.');
@@ -301,11 +296,13 @@ const TripOps = {
     };
 
     DB.push('trucks', truck);
-logActivity({ module: 'trucks', action: 'create', description: `Added truck ${truck.plateNumber}`, ref: truck.plateNumber, user: 'admin' });
-alert(`Truck "${plate}" added successfully...`);
+    if (typeof logActivity === 'function') {
+      logActivity({ module: 'trucks', action: 'create', description: `Added truck ${truck.plateNumber}`, ref: truck.plateNumber, user: 'admin' });
+    }
+    alert(`Truck "${plate}" added successfully with ${trailerCount} trailer(s)!`);
+    App.refresh();
   },
 
-  // ======================== ADD DRIVER ========================
   addDriver() {
     const name = document.getElementById('drvName').value.trim();
     if (!name) return alert('Driver name is required.');
@@ -319,11 +316,13 @@ alert(`Truck "${plate}" added successfully...`);
     };
 
     DB.push('drivers', d);
-logActivity({ module: 'drivers', action: 'create', description: `Added driver ${d.name}`, ref: d.name, user: 'admin' });
-alert(`Driver "${name}" added successfully!`);
+    if (typeof logActivity === 'function') {
+      logActivity({ module: 'drivers', action: 'create', description: `Added driver ${d.name}`, ref: d.name, user: 'admin' });
+    }
+    alert(`Driver "${name}" added successfully!`);
+    App.refresh();
   },
 
-  // ======================== ADD CUSTOMER ========================
   addCustomer() {
     const name = document.getElementById('custName').value.trim();
     if (!name) return alert('Customer name is required.');
@@ -335,11 +334,13 @@ alert(`Driver "${name}" added successfully!`);
     };
 
     DB.push('customers', c);
-logActivity({ module: 'customers', action: 'create', description: `Added customer ${c.name}`, ref: c.name, user: 'admin' });
-alert(`Customer "${name}" added successfully!`);
+    if (typeof logActivity === 'function') {
+      logActivity({ module: 'customers', action: 'create', description: `Added customer ${c.name}`, ref: c.name, user: 'admin' });
+    }
+    alert(`Customer "${name}" added successfully!`);
+    App.refresh();
   },
 
-  // ======================== TRIP LOGIC ========================
   autoFillDriver() {
     const truckSelect = document.getElementById('tripTruck');
     const driverSelect = document.getElementById('tripDriver');
@@ -347,15 +348,11 @@ alert(`Customer "${name}" added successfully!`);
 
     const truckId = truckSelect.value;
     const drivers = DB.drivers();
-    
-    // Find if this truck has an assigned driver
     const assignedDriver = drivers.find(d => d.truckId === truckId);
     
     if (assignedDriver) {
-      // Auto-select the assigned driver in the dropdown
       driverSelect.value = assignedDriver.id;
     } else {
-      // Reset to "Select Driver"
       driverSelect.value = '';
     }
   },
@@ -440,7 +437,6 @@ alert(`Customer "${name}" added successfully!`);
     const paidAmount = Number(document.getElementById('tripPaidAmount').value) || 0;
     const balance = totalPrice - paidAmount;
     
-    // Read directly from the dropdowns
     const truckId = document.getElementById('tripTruck').value;
     const driverId = document.getElementById('tripDriver').value;
     const customerId = document.getElementById('tripCustomer').value;
@@ -466,8 +462,10 @@ alert(`Customer "${name}" added successfully!`);
     if (!trip.from || !trip.to) return alert('Please select both Origin and Destination regions.');
 
     DB.push('trips', trip);
-logActivity({ module: 'trips', action: 'create', description: `Trip ${trip.from} → ${trip.to}`, ref: trip.truckId, user: 'admin' });
-if (paidAmount > 0)
+    
+    if (typeof logActivity === 'function') {
+      logActivity({ module: 'trips', action: 'create', description: `Trip ${trip.from} to ${trip.to}`, ref: trip.truckId, user: 'admin' });
+    }
 
     if (paidAmount > 0) {
       DB.push('income', {
@@ -496,8 +494,10 @@ if (paidAmount > 0)
   deleteTrip(id) {
     if (confirm('Delete this trip? Note: This will NOT automatically reverse associated income or debt records.')) {
       DB.remove('trips', id);
-logActivity({ module: 'trips', action: 'delete', description: `Deleted trip ${id}`, ref: id, user: 'admin' });
-App.refresh();
+      if (typeof logActivity === 'function') {
+        logActivity({ module: 'trips', action: 'delete', description: `Deleted trip ${id}`, ref: id, user: 'admin' });
+      }
+      App.refresh();
     }
   }
 };
