@@ -580,3 +580,47 @@ img, svg, canvas, video {
 .leaflet-container {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
+
+/* ====== FIX MAP OVERLAP WITH SIDEBAR ====== */
+#map {
+  position: relative !important;
+  z-index: 1 !important;
+  overflow: hidden;
+}
+
+.leaflet-container {
+  z-index: 1 !important;
+}
+
+.leaflet-pane {
+  z-index: 2 !important;
+}
+
+.leaflet-popup-pane {
+  z-index: 600 !important;
+}
+
+.leaflet-tooltip-pane {
+  z-index: 650 !important;
+}
+
+/* Ensure sidebar stays above map */
+.sidebar {
+  z-index: 1000 !important;
+}
+
+/* Ensure topbar stays above everything */
+.topbar {
+  z-index: 1001 !important;
+}
+
+/* Fix for mobile view */
+@media (max-width: 1079px) {
+  body.nav-open #map {
+    pointer-events: none;
+  }
+  
+  body.nav-open .leaflet-container {
+    pointer-events: none;
+  }
+}
