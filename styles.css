@@ -845,3 +845,21 @@ img, svg, canvas, video {
   }
   .history-table .desc-cell { max-width: 180px; }
 }
+
+/* Login Logo */
+.login-logo {
+  width: 100%;
+  max-width: 220px;  /* Adjust based on your resized image */
+  height: auto;
+  margin-bottom: 18px;
+  object-fit: contain;
+  display: block;
+}
+
+/* App Header Icon */
+.brand-icon {
+  width: 44px;  /* Adjust based on your resized image */
+  height: 44px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
