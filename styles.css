@@ -80,37 +80,118 @@ svg.icon-sm { width: 14px !important; height: 14px !important; }
 .connection-status i { font-size: 12px !important; }
 .brand-icon { width: 36px !important; height: 36px !important; }
 
-/* ====== LOGIN SCREEN ====== */
+/* ====== LOGIN SCREEN WITH TRUCK BACKGROUND ====== */
 .login-overlay {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: linear-gradient(135deg, rgba(30, 58, 138, 0.9), rgba(30, 58, 138, 0.8)),
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.85), rgba(30, 58, 138, 0.75)),
               url('https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=1920&q=80') center/cover no-repeat;
-  display: flex; justify-content: center; align-items: flex-start;
-  z-index: 9999; overflow-y: auto; padding: 24px 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  overflow-y: auto;
+  padding: 20px 16px;
 }
+
 .login-card {
-  background: var(--white); padding: clamp(24px, 6vw, 40px);
-  border-radius: 16px; box-shadow: var(--shadow-lg);
-  width: 100%; max-width: 400px; text-align: center; margin: auto;
+  background: var(--white);
+  padding: clamp(20px, 5vw, 32px);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+  margin: auto;
 }
-.login-header { display: flex; flex-direction: column; align-items: center; margin-bottom: 18px; }
-.login-logo { width: 100%; max-width: clamp(120px, 40vw, 160px); height: auto; margin-bottom: 18px; object-fit: contain; display: block; }
-.login-card h1 { margin: 0 0 5px 0; color: var(--primary-dark); font-size: 24px; font-weight: 700; }
-.login-card .subtitle { margin: 0 0 30px 0; color: var(--text-light); font-size: 14px; }
+
+.login-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.login-logo {
+  width: 100%;
+  max-width: 140px;
+  height: auto;
+  margin-bottom: 12px;
+  object-fit: contain;
+  display: block;
+}
+
+.login-card h1 {
+  margin: 0 0 4px 0;
+  color: var(--primary-dark);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.login-card .subtitle {
+  margin: 0 0 20px 0;
+  color: var(--text-light);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
 .login-card input {
-  width: 100%; padding: 12px 16px; margin: 10px 0;
-  border: 1.5px solid var(--border); border-radius: 8px; font-size: 16px; transition: border-color 0.2s;
+  width: 100%;
+  padding: 11px 14px;
+  margin: 8px 0;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 15px;
+  transition: border-color 0.2s;
 }
-.login-card input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1); }
+
+.login-card input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+}
+
 .login-card button#loginBtn {
-  width: 100%; padding: 14px 20px; margin-top: 20px;
+  width: 100%;
+  padding: 12px 20px;
+  margin-top: 16px;
   background: linear-gradient(135deg, var(--primary), var(--primary-light));
-  color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 700;
-  cursor: pointer; box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2); transition: all 0.2s; min-height: 48px;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
+  transition: all 0.2s;
+  min-height: 46px;
 }
-.login-card button#loginBtn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(30, 64, 175, 0.3); }
-.login-card .support { margin-top: 28px; font-size: 13px; color: var(--text-light); line-height: 1.6; }
-.login-footer { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); color: rgba(255, 255, 255, 0.9); font-size: 12px; text-align: center; }
+
+.login-card button#loginBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(30, 64, 175, 0.3);
+}
+
+.login-card .support {
+  margin-top: 20px;
+  font-size: 12px;
+  color: var(--text-light);
+  line-height: 1.5;
+}
+
+.login-footer {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 11px;
+  text-align: center;
+}
+
 .hidden { display: none !important; }
 
 /* ====== TOPBAR ====== */
