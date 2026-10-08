@@ -16,10 +16,15 @@ const TripOps = {
         <h2><i class="fas fa-clipboard-list"></i> Operations — Trip Management</h2>
       </div>
 
-      <!-- GRID LAYOUT FOR FORMS (2 Columns) -->
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 20px; margin-bottom: 30px;">
+      <!-- GRID LAYOUT FOR FORMS (Responsive) -->
+      <div class="operations-grid" style="
+        display: grid; 
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); 
+        gap: 20px; 
+        margin-bottom: 30px;
+      ">
         
-        <!-- ========== LEFT COLUMN: ADD TRUCK ========== -->
+        <!-- ========== ADD TRUCK ========== -->
         <div class="form-section">
           <h2><i class="fas fa-truck"></i> Add New Truck</h2>
           <div class="form-row">
@@ -67,7 +72,7 @@ const TripOps = {
           </button>
         </div>
 
-        <!-- ========== RIGHT COLUMN: ADD DRIVER ========== -->
+        <!-- ========== ADD DRIVER ========== -->
         <div class="form-section">
           <h2><i class="fas fa-user"></i> Add New Driver</h2>
           <div class="form-row">
@@ -98,7 +103,7 @@ const TripOps = {
           </button>
         </div>
 
-        <!-- ========== LEFT COLUMN ROW 2: ADD CUSTOMER ========== -->
+        <!-- ========== ADD CUSTOMER ========== -->
         <div class="form-section">
           <h2><i class="fas fa-user-tie"></i> Add New Customer</h2>
           <div class="form-row">
@@ -123,7 +128,7 @@ const TripOps = {
           </button>
         </div>
 
-        <!-- ========== RIGHT COLUMN ROW 2: RECORD NEW TRIP ========== -->
+        <!-- ========== RECORD NEW TRIP ========== -->
         <div class="form-section">
           <h2><i class="fas fa-plus-circle"></i> Record New Trip</h2>
           
