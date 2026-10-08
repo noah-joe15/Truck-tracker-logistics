@@ -16,94 +16,100 @@ const TripOps = {
         <h2><i class="fas fa-clipboard-list"></i> Operations — Trip Management</h2>
       </div>
 
-      <!-- ========== INLINE: ADD TRUCK ========== -->
-      <div class="form-section">
-        <h2><i class="fas fa-truck"></i> Add New Truck</h2>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Truck Plate Number</label>
-            <input type="text" id="truckPlate" class="input-field" placeholder="e.g., T 123 ABC">
+      <!-- GRID LAYOUT FOR FORMS (2 Columns) -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 20px; margin-bottom: 30px;">
+        
+        <!-- ========== LEFT COLUMN: ADD TRUCK ========== -->
+        <div class="form-section">
+          <h2><i class="fas fa-truck"></i> Add New Truck</h2>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Truck Plate Number</label>
+              <input type="text" id="truckPlate" class="input-field" placeholder="e.g., T 123 ABC">
+            </div>
+            <div class="form-group">
+              <label>Brand</label>
+              <select id="truckBrand" class="input-field">
+                ${this.brands.map(b => `<option>${b}</option>`).join('')}
+              </select>
+            </div>
           </div>
-          <div class="form-group">
-            <label>Brand</label>
-            <select id="truckBrand" class="input-field">
-              ${this.brands.map(b => `<option>${b}</option>`).join('')}
-            </select>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Model</label>
+              <input type="text" id="truckModel" class="input-field" placeholder="e.g., R500">
+            </div>
+            <div class="form-group">
+              <label>Year</label>
+              <input type="number" id="truckYear" class="input-field" value="2024" min="1990" max="2030">
+            </div>
           </div>
-          <div class="form-group">
-            <label>Model</label>
-            <input type="text" id="truckModel" class="input-field" placeholder="e.g., R500">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Number of Trailers</label>
+              <select id="truckTrailersCount" class="input-field" onchange="TripOps.renderTrailerPlates()">
+                <option value="0">0 Trailers</option>
+                <option value="1">1 Trailer</option>
+                <option value="2">2 Trailers</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Fuel Type</label>
+              <select id="truckFuel" class="input-field">
+                <option>Diesel</option>
+                <option>Petrol</option>
+              </select>
+            </div>
           </div>
-          <div class="form-group">
-            <label>Year</label>
-            <input type="number" id="truckYear" class="input-field" value="2024" min="1990" max="2030">
-          </div>
+          <div id="trailerPlatesContainer"></div>
+          <button class="btn-primary" onclick="TripOps.addTruck()" style="margin-top: 12px; width: 100%;">
+            <i class="fas fa-truck"></i> Add Truck
+          </button>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Number of Trailers</label>
-            <select id="truckTrailersCount" class="input-field" onchange="TripOps.renderTrailerPlates()">
-              <option value="0">0 Trailers</option>
-              <option value="1">1 Trailer</option>
-              <option value="2">2 Trailers</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Fuel Type</label>
-            <select id="truckFuel" class="input-field">
-              <option>Diesel</option>
-              <option>Petrol</option>
-            </select>
-          </div>
-        </div>
-        <div id="trailerPlatesContainer"></div>
-        <button class="btn-primary" onclick="TripOps.addTruck()">
-          <i class="fas fa-truck"></i> Add Truck
-        </button>
-      </div>
 
-      <!-- ========== INLINE: ADD DRIVER ========== -->
-      <div class="form-section">
-        <h2><i class="fas fa-user"></i> Add New Driver</h2>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Full Name</label>
-            <input type="text" id="drvName" class="input-field" placeholder="Driver full name">
+        <!-- ========== RIGHT COLUMN: ADD DRIVER ========== -->
+        <div class="form-section">
+          <h2><i class="fas fa-user"></i> Add New Driver</h2>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Full Name</label>
+              <input type="text" id="drvName" class="input-field" placeholder="Driver full name">
+            </div>
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input type="text" id="drvPhone" class="input-field" placeholder="+255...">
+            </div>
           </div>
-          <div class="form-group">
-            <label>Phone Number</label>
-            <input type="text" id="drvPhone" class="input-field" placeholder="+255...">
+          <div class="form-row">
+            <div class="form-group">
+              <label>License No.</label>
+              <input type="text" id="drvLicense" class="input-field" placeholder="License number">
+            </div>
+            <div class="form-group">
+              <label>Assign Truck (Optional)</label>
+              <select id="drvTruck" class="input-field">
+                <option value="">None (Unassigned)</option>
+                ${trucks.map(t => `<option value="${t.id}">${t.plateNumber}</option>`).join('')}
+              </select>
+            </div>
           </div>
+          <button class="btn-primary" onclick="TripOps.addDriver()" style="margin-top: 12px; width: 100%;">
+            <i class="fas fa-user-plus"></i> Add Driver
+          </button>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>License No.</label>
-            <input type="text" id="drvLicense" class="input-field" placeholder="License number">
-          </div>
-          <div class="form-group">
-            <label>Assign Truck (Optional)</label>
-            <select id="drvTruck" class="input-field">
-              <option value="">None (Unassigned)</option>
-              ${trucks.map(t => `<option value="${t.id}">${t.plateNumber}</option>`).join('')}
-            </select>
-          </div>
-        </div>
-        <button class="btn-primary" onclick="TripOps.addDriver()">
-          <i class="fas fa-user-plus"></i> Add Driver
-        </button>
-      </div>
 
-      <!-- ========== INLINE: ADD CUSTOMER ========== -->
-      <div class="form-section">
-        <h2><i class="fas fa-user-tie"></i> Add New Customer</h2>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Customer / Company Name</label>
-            <input type="text" id="custName" class="input-field" placeholder="Customer full name or company">
-          </div>
-          <div class="form-group">
-            <label>Phone Number</label>
-            <input type="text" id="custPhone" class="input-field" placeholder="+255...">
+        <!-- ========== LEFT COLUMN ROW 2: ADD CUSTOMER ========== -->
+        <div class="form-section">
+          <h2><i class="fas fa-user-tie"></i> Add New Customer</h2>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Customer / Company Name</label>
+              <input type="text" id="custName" class="input-field" placeholder="Customer full name or company">
+            </div>
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input type="text" id="custPhone" class="input-field" placeholder="+255...">
+            </div>
           </div>
           <div class="form-group">
             <label>Destination / Location</label>
@@ -112,130 +118,97 @@ const TripOps = {
               ${tzRegions.map(r => `<option value="${r}">${r}</option>`).join('')}
             </select>
           </div>
+          <button class="btn-primary" onclick="TripOps.addCustomer()" style="margin-top: 12px; width: 100%;">
+            <i class="fas fa-user-plus"></i> Add Customer
+          </button>
         </div>
-        <button class="btn-primary" onclick="TripOps.addCustomer()">
-          <i class="fas fa-user-plus"></i> Add Customer
-        </button>
+
+        <!-- ========== RIGHT COLUMN ROW 2: RECORD NEW TRIP ========== -->
+        <div class="form-section">
+          <h2><i class="fas fa-plus-circle"></i> Record New Trip</h2>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label>Date</label>
+              <input type="date" id="tripDate" class="input-field" value="${Utils.today()}">
+            </div>
+            <div class="form-group">
+              <label>Truck</label>
+              <select id="tripTruck" class="input-field" onchange="TripOps.autoFillDriver()">
+                <option value="">-- Select Truck --</option>
+                ${trucks.map(t => `<option value="${t.id}" data-driver="${t.driverId || ''}">${t.plateNumber}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Select Driver</label>
+              <select id="tripDriver" class="input-field">
+                <option value="">-- Select Driver --</option>
+                ${drivers.map(d => {
+                  const truck = trucks.find(t => t.id === d.truckId);
+                  return `<option value="${d.id}">${d.name}${truck ? ' (' + Utils.esc(truck.plateNumber) + ')' : ' (Unassigned)'}</option>`;
+                }).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Customer</label>
+              <select id="tripCustomer" class="input-field">
+                ${Utils.optionsHTML(customers, 'name', 'id', 'Select Customer...')}
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>From (Region)</label>
+              <select id="tripFrom" class="input-field" onchange="TripOps.calculateDistance()">
+                <option value="">-- Select Origin --</option>
+                ${tzRegions.map(r => `<option value="${r}">${r}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>To (Region)</label>
+              <select id="tripTo" class="input-field" onchange="TripOps.calculateDistance()">
+                <option value="">-- Select Destination --</option>
+                ${tzRegions.map(r => `<option value="${r}">${r}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Distance (Km)</label>
+              <input type="number" id="tripDist" class="input-field" placeholder="Auto" min="0" oninput="TripOps.updateFuelEstimate()">
+            </div>
+            <div class="form-group">
+              <label>Total Price (TZS)</label>
+              <input type="number" id="tripTotalPrice" class="input-field" placeholder="0.00" min="0" oninput="TripOps.calculateBalance()">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Paid Now (TZS)</label>
+              <input type="number" id="tripPaidAmount" class="input-field" placeholder="0.00" min="0" oninput="TripOps.calculateBalance()">
+            </div>
+            <div class="form-group">
+              <label>Balance (Debt)</label>
+              <input type="text" id="tripBalance" class="input-field" readonly value="0 TZS" style="background-color: #fef2f2; color: #dc2626; font-weight: bold;">
+            </div>
+          </div>
+
+          <div id="fuelEstimate" class="smart-estimate" style="display:none; margin: 8px 0;"></div>
+
+          <button class="btn-primary" onclick="TripOps.saveTrip()" style="margin-top: 12px; width: 100%;">
+            <i class="fas fa-save"></i> Save Trip
+          </button>
+        </div>
+
       </div>
 
-      <!-- ========== RECORD NEW TRIP ========== -->
-      <div class="form-section">
-        <h2><i class="fas fa-plus-circle"></i> Record New Trip</h2>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Date</label>
-            <input type="date" id="tripDate" class="input-field" value="${Utils.today()}">
-          </div>
-          <div class="form-group">
-            <label>Truck</label>
-            <select id="tripTruck" class="input-field" onchange="TripOps.autoFillDriver()">
-              <option value="">-- Select Truck --</option>
-              ${trucks.map(t => `<option value="${t.id}" data-driver="${t.driverId || ''}">${t.plateNumber}</option>`).join('')}
-            </select>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Select Driver</label>
-            <select id="tripDriver" class="input-field">
-              <option value="">-- Select Driver --</option>
-              ${drivers.map(d => {
-                const truck = trucks.find(t => t.id === d.truckId);
-                return `<option value="${d.id}">${d.name}${truck ? ' (' + Utils.esc(truck.plateNumber) + ')' : ' (Unassigned)'}</option>`;
-              }).join('')}
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Customer</label>
-            <select id="tripCustomer" class="input-field">
-              ${Utils.optionsHTML(customers, 'name', 'id', 'Select Customer...')}
-            </select>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Trip Type</label>
-            <select id="tripType" class="input-field">
-              <option>Single Trip</option>
-              <option>Round Trip</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Load Status</label>
-            <select id="tripLoad" class="input-field">
-              <option>Loaded</option>
-              <option>Empty</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>From (Region)</label>
-            <select id="tripFrom" class="input-field" onchange="TripOps.calculateDistance()">
-              <option value="">-- Select Origin Region --</option>
-              ${tzRegions.map(r => `<option value="${r}">${r}</option>`).join('')}
-            </select>
-          </div>
-          <div class="form-group">
-            <label>To (Region)</label>
-            <select id="tripTo" class="input-field" onchange="TripOps.calculateDistance()">
-              <option value="">-- Select Destination Region --</option>
-              ${tzRegions.map(r => `<option value="${r}">${r}</option>`).join('')}
-            </select>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Distance (Km)</label>
-            <input type="number" id="tripDist" class="input-field" placeholder="Auto-calculated" min="0" oninput="TripOps.updateFuelEstimate()">
-          </div>
-          <div class="form-group">
-            <label>Total Trip Price (TZS)</label>
-            <input type="number" id="tripTotalPrice" class="input-field" placeholder="0.00" min="0" oninput="TripOps.calculateBalance()">
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Amount Paid Now (TZS)</label>
-            <input type="number" id="tripPaidAmount" class="input-field" placeholder="0.00" min="0" oninput="TripOps.calculateBalance()">
-          </div>
-          <div class="form-group">
-            <label>Remaining Balance (Debt)</label>
-            <input type="text" id="tripBalance" class="input-field" readonly value="0 TZS" style="background-color: #fef2f2; color: #dc2626; font-weight: bold;">
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Status</label>
-            <select id="tripStatus" class="input-field">
-              <option>In Transit</option>
-              <option>Completed</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>On Time?</label>
-            <select id="tripOnTime" class="input-field">
-              <option value="1">Yes</option>
-              <option value="0">No</option>
-            </select>
-          </div>
-        </div>
-
-        <div id="fuelEstimate" class="smart-estimate" style="display:none;"></div>
-
-        <button class="btn-primary" onclick="TripOps.saveTrip()">
-          <i class="fas fa-save"></i> Save Trip & Process Payment
-        </button>
-      </div>
-
-      <!-- ========== TRIP HISTORY ========== -->
+      <!-- ========== FULL WIDTH: TRIP HISTORY ========== -->
       <div class="form-section">
         <h2><i class="fas fa-history"></i> Trip History</h2>
         <div class="table-wrapper">
