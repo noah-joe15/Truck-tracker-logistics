@@ -37,7 +37,7 @@ const Auth = {
     }
   },
 
-  playTruckAnimation() {
+   playTruckAnimation() {
     const overlay = document.getElementById('truckDriveOverlay');
     const loginCard = document.querySelector('.login-card');
     const truckSound = document.getElementById('truckSound');
@@ -53,20 +53,49 @@ const Auth = {
         overlay.classList.add('active');
       }
       
-      // 3. Play the truck sound (with volume control)
+      // 3. Play the truck sound with better error handling
       if (truckSound) {
-        truckSound.volume = 0.6; // 50% volume so it's not too loud
+        truckSound.volume = 0.6; 
         truckSound.currentTime = 0;
         
-        // Try to play - browsers may block autoplay
+        // Try to play the sound
         const playPromise = truckSound.play();
+        
         if (playPromise !== undefined) {
-          playPromise.catch(error => {
+          playPromise.then(() => {
+            console.log('Truck sound playing successfully');
+          }).catch(error => {
             console.log('Audio autoplay blocked by browser:', error);
-            // Sound won't play, but animation will still work
+            console.log('User must interact with page first');
+            
+            // Fallback: Try playing after the next user interaction
+            document.addEventListener('click', () => {
+              truckSound.play().catch(() => {});
+            }, { once: true });
           });
         }
       }
+      
+      // 4. After animation completes, show the app
+      setTimeout(() => {
+        // Stop the sound
+        if (truckSound) {
+          truckSound.pause();
+          truckSound.currentTime = 0;
+        }
+        
+        // Hide the overlay
+        if (overlay) {
+          overlay.classList.remove('active');
+        }
+        
+        // Show the main app
+        App.showApp();
+        
+      }, 3500); // 3.5 seconds matches the CSS animation duration
+      
+    }, 400); // Small delay to let the card fade out first
+  },
       
       // 4. After animation completes, show the app
       setTimeout(() => {
