@@ -5,8 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>MALIBORA - International Logistics Truck Management System</title>
   
-  <!-- Favicon -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%231e40af'><rect x='1' y='3' width='15' height='13' rx='2'/><polygon points='16 8 20 8 23 11 23 16 16 16 16 8'/><circle cx='5.5' cy='18.5' r='2.5'/><circle cx='18.5' cy='18.5' r='2.5'/></svg>">
+  <!-- Favicon - NEW TRUCK ICON -->
+  <link rel="icon" type="image/png" href="favicon.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="favicon.png" sizes="16x16">
+  
+  <!-- Apple Touch Icon (for iOS) -->
+  <link rel="apple-touch-icon" href="app-icon.png">
   
   <!-- Core Styles -->
   <link rel="stylesheet" href="styles.css" />
@@ -45,13 +49,15 @@
     <symbol id="i-chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></symbol>
     <symbol id="i-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></symbol>
     <symbol id="i-inbox" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></symbol>
+    <symbol id="i-truck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></symbol>
   </svg>
 
   <!-- LOGIN SCREEN -->
   <section id="loginScreen" class="login-overlay">
     <div class="login-card">
       <div class="login-header">
-        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%231e40af'%3E%3Cpath d='M1 3h15v13H1z' opacity='.3'/%3E%3Cpath d='M16 8h4l3 3v5h-7z'/%3E%3Ccircle cx='5.5' cy='18.5' r='2.5'/%3E%3Ccircle cx='18.5' cy='18.5' r='2.5'/%3E%3C/svg%3E" alt="Malibora Logo" class="login-logo" />
+        <!-- NEW TRUCK LOGO -->
+        <img src="logo.png" alt="Malibora Logo" class="login-logo" />
         <h1>MALIBORA</h1>
         <p class="subtitle">International Logistics Truck Management System (ILTM)</p>
       </div>
@@ -81,7 +87,8 @@
       </button>
       
       <div class="brand">
-        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M1 3h15v13H1z' opacity='.3'/%3E%3Cpath d='M16 8h4l3 3v5h-7z'/%3E%3Ccircle cx='5.5' cy='18.5' r='2.5'/%3E%3Ccircle cx='18.5' cy='18.5' r='2.5'/%3E%3C/svg%3E" alt="Logo" class="brand-icon" />
+        <!-- NEW TRUCK ICON FOR HEADER -->
+        <img src="app-icon.png" alt="Logo" class="brand-icon" />
         <div class="brand-text">
           <strong>MALIBORA</strong>
           <span>ILTM v9.2</span>
@@ -159,11 +166,11 @@
   <script src="analytics.js"></script>
   
   <!-- Map & Advanced Operations -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script> <!-- Leaflet JS loaded here -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="map.js"></script>
   <script src="tripOperations.js"></script>
   
-  <!-- History Module (Must be before app.js) -->
+  <!-- History Module -->
   <script src="history.js"></script>
   
   <!-- App Initialization (LAST) -->
