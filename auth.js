@@ -37,7 +37,7 @@ const Auth = {
     }
   },
 
-   playTruckAnimation() {
+  playTruckAnimation() {
     const overlay = document.getElementById('truckDriveOverlay');
     const loginCard = document.querySelector('.login-card');
     const truckSound = document.getElementById('truckSound');
@@ -75,27 +75,6 @@ const Auth = {
           });
         }
       }
-      
-      // 4. After animation completes, show the app
-      setTimeout(() => {
-        // Stop the sound
-        if (truckSound) {
-          truckSound.pause();
-          truckSound.currentTime = 0;
-        }
-        
-        // Hide the overlay
-        if (overlay) {
-          overlay.classList.remove('active');
-        }
-        
-        // Show the main app
-        App.showApp();
-        
-      }, 3500); // 3.5 seconds matches the CSS animation duration
-      
-    }, 400); // Small delay to let the card fade out first
-  },
       
       // 4. After animation completes, show the app
       setTimeout(() => {
