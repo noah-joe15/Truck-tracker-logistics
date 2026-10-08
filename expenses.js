@@ -1,7 +1,7 @@
 const Expenses = {
-  // State to hold items before saving
-  pendingExpenses: [],
-
+  // State for the batch entry
+  batchExpenses: {}, // Stores { 'Category Name': Amount }
+  
   categories: [
     'Fuel (Diesel/Petrol)', 'Maintenance & Servicing', 'Spare Parts',
     'Tolls & Weighbridge', 'Parking Fees', 'Driver Allowance / Per Diem',
@@ -21,15 +21,16 @@ const Expenses = {
     const expenses = DB.expenses().sort((a, b) => new Date(b.date) - new Date(a.date));
     const totalExp = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
     
-    // Calculate total of current pending batch
-    const pendingTotal = this.pendingExpenses.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+    // Calculate total of currently selected batch
+    const batchTotal = Object.values(this.batchExpenses).reduce((sum, val) => sum + Number(val || 0), 0);
+    const selectedCount = Object.keys(this.batchExpenses).length;
 
     return `
       <div class="section-title">
         <h2><i class="fas fa-wallet"></i> Expense Management</h2>
       </div>
       
-      <!-- 1. TRIP DETAILS (Applies to all items in this batch) -->
+      <!-- 1. TRIP DETAILS -->
       <div class="form-section">
         <h2><i class="fas fa-truck"></i> 1. Trip Details</h2>
         <div class="form-row">
@@ -79,71 +80,85 @@ const Expenses = {
         </div>
       </div>
 
-      <!-- 2. ADD ITEMS (The Batch List) -->
+      <!-- 2. MANAGE CATEGORIES -->
+      <div class="form-section" style="background: rgba(241, 245, 249, 0.5); border: 1px dashed var(--border);">
+        <div style="display: flex; gap: 10px; align-items: flex-end;">
+          <div class="form-group" style="flex: 1; margin: 0;">
+            <label><i class="fas fa-tags"></i> Add New Category</label>
+            <input type="text" id="newCategoryInput" class="input-field" placeholder="e.g., Car Wash, Lunch">
+          </div>
+          <button class="btn-primary" onclick="Expenses.addNewCategory()" style="margin: 0; padding: 11px 20px;">
+            <i class="fas fa-plus"></i> Add
+          </button>
+        </div>
+      </div>
+
+      <!-- 3. EXPENSE TRAY (MULTI-SELECT) -->
       <div class="form-section">
-        <h2><i class="fas fa-plus-circle"></i> 2. Add Expense Items</h2>
-        <div class="form-row">
-          <div class="form-group" style="flex: 2;">
-            <label>Expense Category</label>
-            <select id="expCategory" class="input-field">
-              <option value="">-- Choose Category --</option>
-              ${this.categories.map(c => `<option value="${c}">${c}</option>`).join('')}
-            </select>
-          </div>
-          <div class="form-group" style="flex: 1;">
-            <label>Amount (TZS)</label>
-            <input type="number" id="expAmount" class="input-field" placeholder="0.00" min="0">
-          </div>
-          <div class="form-group" style="flex: 2;">
-            <label>Description / Notes (Optional)</label>
-            <input type="text" id="expDesc" class="input-field" placeholder="e.g., Oil change, Weighbridge fee">
-          </div>
+        <h2><i class="fas fa-clipboard-list"></i> 2. Select Expenses & Enter Costs</h2>
+        <p style="color: var(--text-light); font-size: 13px; margin-bottom: 15px;">
+          Tick the boxes below for expenses incurred, then enter the cost for each.
+        </p>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; margin-bottom: 20px;">
+          ${this.categories.map(cat => {
+            const isSelected = this.batchExpenses.hasOwnProperty(cat);
+            const amount = this.batchExpenses[cat] || '';
+            
+            return `
+              <div style="border: 1px solid var(--border); border-radius: 8px; padding: 12px; background: ${isSelected ? '#f0f9ff' : 'white'}; transition: all 0.2s;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: ${isSelected ? '10px' : '0'};">
+                  <input type="checkbox" id="chk_${cat.replace(/\s+/g, '_')}" 
+                    ${isSelected ? 'checked' : ''} 
+                    onchange="Expenses.toggleExpense('${Utils.esc(cat)}')"
+                    style="width: 18px; height: 18px; cursor: pointer;">
+                  <label for="chk_${cat.replace(/\s+/g, '_')}" style="font-weight: 600; color: var(--text); cursor: pointer; flex: 1;">
+                    ${Utils.esc(cat)}
+                  </label>
+                </div>
+                ${isSelected ? `
+                  <div style="margin-top: 8px;">
+                    <label style="font-size: 11px; color: var(--text-light); display: block; margin-bottom: 4px;">Amount (TZS)</label>
+                    <input type="number" 
+                      value="${amount}" 
+                      oninput="Expenses.updateAmount('${Utils.esc(cat)}', this.value)"
+                      class="input-field" 
+                      placeholder="0.00" 
+                      style="width: 100%; padding: 8px; font-size: 14px;"
+                      autofocus>
+                  </div>
+                ` : ''}
+              </div>
+            `;
+          }).join('')}
         </div>
-        <button class="btn-primary" onclick="Expenses.addItem()" style="margin-top: 10px; width: 100%;">
-          <i class="fas fa-plus"></i> Add Item to List
-        </button>
       </div>
 
-      <!-- 3. PENDING LIST & SAVE -->
-      <div class="form-section" style="${this.pendingExpenses.length === 0 ? 'display:none;' : ''}">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-          <h2 style="margin: 0; color: var(--primary);"><i class="fas fa-list"></i> Pending Items (${this.pendingExpenses.length})</h2>
-          <span class="badge badge-danger" style="font-size: 16px; padding: 8px 12px;">Batch Total: ${Utils.fmtTZS(pendingTotal)}</span>
+      <!-- 4. SAVE BATCH -->
+      ${selectedCount > 0 ? `
+        <div class="form-section" style="background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border: 2px solid var(--primary);">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div>
+              <h3 style="margin: 0; color: var(--primary-dark);">
+                <i class="fas fa-calculator"></i> Batch Total
+              </h3>
+              <p style="margin: 4px 0 0 0; color: var(--text-light); font-size: 13px;">
+                ${selectedCount} item(s) selected
+              </p>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 28px; font-weight: 800; color: var(--primary); line-height: 1;">
+                ${Utils.fmtTZS(batchTotal)}
+              </div>
+            </div>
+          </div>
+          <button class="btn-primary" onclick="Expenses.saveBatch()" style="margin-top: 15px; width: 100%; font-size: 16px; padding: 14px;">
+            <i class="fas fa-save"></i> Save All ${selectedCount} Expenses
+          </button>
         </div>
-        
-        <div class="table-wrapper">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Category</th>
-                <th>Amount</th>
-                <th>Description</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${this.pendingExpenses.map((item, index) => `
-                <tr>
-                  <td data-label="Category"><span class="badge badge-info">${Utils.esc(item.category)}</span></td>
-                  <td data-label="Amount"><strong>${Utils.fmtTZS(item.amount)}</strong></td>
-                  <td data-label="Description">${Utils.esc(item.description || '---')}</td>
-                  <td data-label="Action">
-                    <button class="btn-danger" onclick="Expenses.removePendingItem(${index})">
-                      <i class="fas fa-times"></i> Remove
-                    </button>
-                  </td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-        
-        <button class="btn-primary" onclick="Expenses.saveBatch()" style="margin-top: 20px; width: 100%; background: linear-gradient(135deg, #16a34a, #15803d);">
-          <i class="fas fa-save"></i> Save All Expenses (${this.pendingExpenses.length} Items)
-        </button>
-      </div>
+      ` : ''}
 
-      <!-- 4. HISTORY -->
+      <!-- 5. HISTORY -->
       <div class="form-section">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
           <h2 style="margin: 0;"><i class="fas fa-history"></i> Recent Expenses</h2>
@@ -227,35 +242,45 @@ const Expenses = {
     document.getElementById('bankGroup').style.display = method === 'Bank' ? 'block' : 'none';
   },
 
-  // Add item to the pending list
-  addItem() {
-    const category = document.getElementById('expCategory').value;
-    const amount = Number(document.getElementById('expAmount').value);
-    const description = document.getElementById('expDesc').value;
-
-    if (!category) return alert('Please select a category.');
-    if (!amount || amount <= 0) return alert('Please enter a valid amount.');
-
-    // Add to array
-    this.pendingExpenses.push({ category, amount, description });
+  // Add a new category to the list
+  addNewCategory() {
+    const input = document.getElementById('newCategoryInput');
+    const val = input.value.trim();
+    if (!val) return alert('Please enter a category name.');
+    if (this.categories.includes(val)) return alert('Category already exists.');
     
-    // Clear inputs for next item
-    document.getElementById('expCategory').value = '';
-    document.getElementById('expAmount').value = '';
-    document.getElementById('expDesc').value = '';
-    document.getElementById('expCategory').focus();
+    this.categories.push(val);
+    input.value = '';
+    App.refresh(); // Re-render to show new checkbox
+  },
 
-    // Refresh view to show new list
+  // Toggle checkbox on/off
+  toggleExpense(category) {
+    if (this.batchExpenses.hasOwnProperty(category)) {
+      delete this.batchExpenses[category];
+    } else {
+      this.batchExpenses[category] = 0;
+    }
     App.refresh();
   },
 
-  // Remove item from pending list
-  removePendingItem(index) {
-    this.pendingExpenses.splice(index, 1);
-    App.refresh();
+  // Update amount for a specific category
+  updateAmount(category, value) {
+    this.batchExpenses[category] = Number(value) || 0;
+    // We don't refresh the whole app here to keep focus on the input, 
+    // but the total updates on the next render or via direct DOM manipulation if we wanted to be fancy.
+    // For simplicity, let's just trigger a refresh to update the Total Display.
+    // Actually, to keep focus, we should update the DOM directly.
+    const totalEl = document.querySelector('.form-section[style*="linear-gradient"] .fa-calculator');
+    if(totalEl) {
+       // This is a bit hacky, better to just refresh if performance allows, 
+       // but for a small app, let's just update the text node of the total.
+       const totalVal = Object.values(this.batchExpenses).reduce((a,b) => a + b, 0);
+       const totalDisplay = document.querySelector('.form-section[style*="linear-gradient"] div[style*="font-size: 28px"]');
+       if(totalDisplay) totalDisplay.innerText = Utils.fmtTZS(totalVal);
+    }
   },
 
-  // Save all pending items to database
   saveBatch() {
     // 1. Validate Header Info
     const date = document.getElementById('expDate').value;
@@ -265,7 +290,9 @@ const Expenses = {
     if (!date) return alert('Please select a date in the Trip Details section.');
     if (!truckId) return alert('Please select a truck in the Trip Details section.');
     if (!method) return alert('Please select a Payment Method in the Trip Details section.');
-    if (this.pendingExpenses.length === 0) return alert('Your list is empty. Add items first.');
+    
+    const categories = Object.keys(this.batchExpenses);
+    if (categories.length === 0) return alert('Please select at least one expense.');
 
     // Validate Payment specifics
     let mobileProvider = '';
@@ -284,40 +311,45 @@ const Expenses = {
 
     // 2. Loop and Save
     let savedCount = 0;
-    this.pendingExpenses.forEach(item => {
+    let totalAmount = 0;
+
+    categories.forEach(cat => {
+      const amount = this.batchExpenses[cat];
+      if (amount <= 0) return; // Skip zero values
+
       const expense = {
         date, 
         truckId, 
         driverId, 
-        category: item.category, 
-        amount: item.amount,
-        description: item.description,
+        category: cat, 
+        amount: amount,
+        description: `Batch entry: ${cat}`, // Auto description
         method, 
         mobileProvider, 
         bank
       };
 
       DB.push('expenses', expense);
+      totalAmount += amount;
+      savedCount++;
       
       if (typeof logActivity === 'function') {
         logActivity({ 
           module: 'expenses', 
           action: 'create', 
-          description: `Batch Expense: ${item.category} - ${Utils.fmtTZS(item.amount)}`, 
+          description: `Batch Expense: ${cat} - ${Utils.fmtTZS(amount)}`, 
           ref: truckId, 
           user: 'admin' 
         });
       }
-      savedCount++;
     });
 
     // 3. Cleanup
-    this.pendingExpenses = []; // Clear the list
-    alert(`Successfully saved ${savedCount} expense(s)!`);
+    this.batchExpenses = {}; // Clear the list
+    alert(`Successfully saved ${savedCount} expense(s) totaling ${Utils.fmtTZS(totalAmount)}!`);
     App.refresh();
   },
 
-  // Delete from history
   remove(id) {
     if (confirm('Are you sure you want to delete this expense record? This cannot be undone.')) {
       DB.remove('expenses', id);
