@@ -77,6 +77,20 @@
     <div class="login-footer">System v9.2 | Complete Edition</div>
   </section>
 
+  <!-- TRUCK DRIVE ANIMATION OVERLAY -->
+<div id="truckDriveOverlay" class="truck-drive-overlay">
+  <div class="drive-text">Loading Your Fleet...</div>
+  <img src="logo.png" alt="Truck" class="truck-animated" />
+  <div class="road-line"></div>
+</div>
+
+<!-- TRUCK ENGINE SOUND -->
+<audio id="truckSound" loop preload="auto">
+  <source src="truck-engine.mp3" type="audio/mpeg">
+  <!-- Fallback CDN sound if local file not found -->
+  <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_7329409f5f.mp3" type="audio/mpeg">
+</audio>
+
   <!-- MAIN APP -->
   <div id="appShell" class="hidden">
     <header class="topbar">
