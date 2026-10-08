@@ -55,7 +55,7 @@ const Auth = {
       
       // 3. Play the truck sound (with volume control)
       if (truckSound) {
-        truckSound.volume = 0.5; // 50% volume so it's not too loud
+        truckSound.volume = 0.6; // 50% volume so it's not too loud
         truckSound.currentTime = 0;
         
         // Try to play - browsers may block autoplay
