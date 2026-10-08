@@ -20,18 +20,83 @@ const Auth = {
 
     if (user === stored.user && pass === stored.pass) {
       localStorage.setItem('iltm_logged_in', '1');
+      
       if (typeof logActivity === 'function') {
-        logActivity({ module: 'auth', action: 'login', description: 'User logged in', user: user });
+        logActivity({ 
+          module: 'auth', 
+          action: 'login', 
+          description: 'User logged in', 
+          user: user 
+        });
       }
-      App.showApp();
+      
+      // Trigger the truck animation!
+      this.playTruckAnimation();
     } else {
       alert('Invalid credentials.\n\nDefault Login:\nUsername: admin\nPassword: admin');
     }
   },
 
+  playTruckAnimation() {
+    const overlay = document.getElementById('truckDriveOverlay');
+    const loginCard = document.querySelector('.login-card');
+    const truckSound = document.getElementById('truckSound');
+    
+    // 1. Fade out the login card
+    if (loginCard) {
+      loginCard.classList.add('driving-away');
+    }
+    
+    // 2. Show the truck overlay after a brief delay
+    setTimeout(() => {
+      if (overlay) {
+        overlay.classList.add('active');
+      }
+      
+      // 3. Play the truck sound (with volume control)
+      if (truckSound) {
+        truckSound.volume = 0.5; // 50% volume so it's not too loud
+        truckSound.currentTime = 0;
+        
+        // Try to play - browsers may block autoplay
+        const playPromise = truckSound.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(error => {
+            console.log('Audio autoplay blocked by browser:', error);
+            // Sound won't play, but animation will still work
+          });
+        }
+      }
+      
+      // 4. After animation completes, show the app
+      setTimeout(() => {
+        // Stop the sound
+        if (truckSound) {
+          truckSound.pause();
+          truckSound.currentTime = 0;
+        }
+        
+        // Hide the overlay
+        if (overlay) {
+          overlay.classList.remove('active');
+        }
+        
+        // Show the main app
+        App.showApp();
+        
+      }, 3500); // 3.5 seconds matches the CSS animation duration
+      
+    }, 400); // Small delay to let the card fade out first
+  },
+
   logout() {
     if (typeof logActivity === 'function') {
-      logActivity({ module: 'auth', action: 'logout', description: 'User logged out', user: 'admin' });
+      logActivity({ 
+        module: 'auth', 
+        action: 'logout', 
+        description: 'User logged out', 
+        user: 'admin' 
+      });
     }
     localStorage.removeItem('iltm_logged_in');
     location.reload();
