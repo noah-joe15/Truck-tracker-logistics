@@ -13,87 +13,87 @@ const History = {
 
     return `
       <div class="section-title">
-        <h2><svg><use href="#i-clock"/></svg> Activity History</h2>
+        <h2><svg style="width:24px;height:24px"><use href="#i-clock"/></svg> Activity History</h2>
       </div>
 
       <div class="history-summary">
         <div class="summary-stat">
-          <div class="stat-icon"><svg><use href="#i-chart"/></svg></div>
+          <div class="stat-icon"><svg style="width:20px;height:20px"><use href="#i-chart"/></svg></div>
           <div class="stat-body">
-            <div class="stat-label">Total Activities</div>
+            <div class="stat-label">Total System Actions</div>
             <div class="stat-value">${total.toLocaleString()}</div>
           </div>
         </div>
         <div class="summary-stat">
-          <div class="stat-icon"><svg><use href="#i-clock"/></svg></div>
+          <div class="stat-icon"><svg style="width:20px;height:20px"><use href="#i-clock"/></svg></div>
           <div class="stat-body">
-            <div class="stat-label">Today</div>
+            <div class="stat-label">Actions Today</div>
             <div class="stat-value">${stats.today}</div>
           </div>
         </div>
         <div class="summary-stat">
-          <div class="stat-icon"><svg><use href="#i-clock"/></svg></div>
+          <div class="stat-icon"><svg style="width:20px;height:20px"><use href="#i-clock"/></svg></div>
           <div class="stat-body">
-            <div class="stat-label">Last 7 Days</div>
+            <div class="stat-label">Actions This Week</div>
             <div class="stat-value">${stats.last7}</div>
           </div>
         </div>
         <div class="summary-stat">
-          <div class="stat-icon"><svg><use href="#i-file"/></svg></div>
+          <div class="stat-icon"><svg style="width:20px;height:20px"><use href="#i-file"/></svg></div>
           <div class="stat-body">
-            <div class="stat-label">Top Module</div>
-            <div class="stat-value">${stats.topModule || '—'}</div>
+            <div class="stat-label">Most Active Area</div>
+            <div class="stat-value">${this.friendlyModuleName(stats.topModule) || '—'}</div>
           </div>
         </div>
         <div class="summary-stat">
-          <div class="stat-icon"><svg><use href="#i-user"/></svg></div>
-          <div class="stat-body">
-            <div class="stat-label">Top User</div>
-            <div class="stat-value">${stats.topUser || '—'}</div>
+          <div class="stat-icon" style="background: rgba(220, 38, 38, 0.1); color: var(--danger);">
+            <svg style="width:20px;height:20px"><use href="#i-x"/></svg>
           </div>
-        </div>
+          <div class="stat-body">
+            <div class="stat-label">Deletions Today</div>
+            <div class="stat-value" style="color: var(--danger);">${stats.deletionsToday || 0}</div>
+          </div>
+        </div> 
       </div>
 
       <div class="module-panel">
-        <h3><svg><use href="#i-chart"/></svg> Activity by Module</h3>
+        <h3><svg style="width:18px;height:18px"><use href="#i-chart"/></svg> Activity by Module</h3>
         ${this.renderModuleBars(stats.byModule, total)}
       </div>
 
       <div class="history-filters">
         <div class="filter-field">
           <label>Search</label>
-          <input type="text" id="hSearch" placeholder="Search description or reference..."
-                 value="${Utils.esc(this.filters.search)}">
+          <input type="text" id="hSearch" class="input-field" placeholder="Search description or reference..." value="${Utils.esc(this.filters.search)}">
         </div>
         <div class="filter-field">
           <label>Module</label>
-          <select id="hModule">
+          <select id="hModule" class="input-field">
             <option value="">All modules</option>
             ${stats.moduleList.map(m => `<option value="${Utils.esc(m)}" ${this.filters.module===m?'selected':''}>${Utils.esc(m)}</option>`).join('')}
           </select>
         </div>
         <div class="filter-field">
           <label>Action</label>
-          <select id="hAction">
+          <select id="hAction" class="input-field">
             <option value="">All actions</option>
-            ${['create','update','delete','login','logout','export'].map(a =>
-              `<option value="${a}" ${this.filters.action===a?'selected':''}>${a}</option>`).join('')}
+            ${['create','update','delete','login','logout','export'].map(a => `<option value="${a}" ${this.filters.action===a?'selected':''}>${a}</option>`).join('')}
           </select>
         </div>
         <div class="filter-field">
           <label>From</label>
-          <input type="date" id="hFrom" value="${this.filters.from}">
+          <input type="date" id="hFrom" class="input-field" value="${this.filters.from}">
         </div>
         <div class="filter-field">
           <label>To</label>
-          <input type="date" id="hTo" value="${this.filters.to}">
+          <input type="date" id="hTo" class="input-field" value="${this.filters.to}">
         </div>
         <div class="filter-field" style="display:flex; gap:6px; align-items:flex-end;">
           <button class="btn-icon-action primary" onclick="History.applyFilters()">
-            <svg><use href="#i-filter"/></svg> Apply
+            <svg style="width:16px;height:16px"><use href="#i-filter"/></svg> Apply
           </button>
           <button class="btn-icon-action danger" onclick="History.clearFilters()">
-            <svg><use href="#i-x"/></svg>
+            <svg style="width:16px;height:16px"><use href="#i-x"/></svg>
           </button>
         </div>
       </div>
@@ -106,17 +106,17 @@ const History = {
           </h3>
           <div class="export-btns">
             <button class="btn-icon-action" onclick="History.exportPDF()">
-              <svg><use href="#i-file"/></svg> PDF
+              <svg style="width:16px;height:16px"><use href="#i-file"/></svg> PDF
             </button>
             <button class="btn-icon-action" onclick="History.exportExcel()">
-              <svg><use href="#i-table"/></svg> Excel
+              <svg style="width:16px;height:16px"><use href="#i-table"/></svg> Excel
             </button>
           </div>
         </div>
 
         ${entries.length === 0 ? `
           <div class="empty-history">
-            <svg><use href="#i-inbox"/></svg>
+            <svg style="width:56px;height:56px;opacity:0.3;margin-bottom:12px;color:var(--primary)"><use href="#i-inbox"/></svg>
             <p>No activities match your filters.</p>
           </div>
         ` : `
@@ -149,6 +149,23 @@ const History = {
         `}
       </div>
     `;
+  },
+
+  friendlyModuleName(module) {
+    const names = {
+      'trucks': 'Trucks',
+      'drivers': 'Drivers',
+      'customers': 'Customers',
+      'trips': 'Trips',
+      'expenses': 'Expenses',
+      'income': 'Payments',
+      'debts': 'Debt Collection',
+      'compliance': 'Compliance',
+      'auth': 'Login / Logout',
+      'system': 'System',
+      'history': 'History'
+    };
+    return names[module] || module;
   },
 
   renderModuleBars(byModule, total) {
@@ -189,14 +206,21 @@ const History = {
     const all = ActivityLog.all();
     const now = Date.now();
     const dayMs = 86400000;
-    let today = 0, last7 = 0;
+    
+    let today = 0, last7 = 0, deletionsToday = 0;
     const byModule = {}, byAction = {}, byUser = {};
     const moduleSet = new Set();
 
     all.forEach(e => {
       const t = new Date(e.ts).getTime();
-      if (now - t < dayMs) today++;
+      
+      if (now - t < dayMs) {
+        today++;
+        if (e.action === 'delete') deletionsToday++; 
+      }
+      
       if (now - t < 7 * dayMs) last7++;
+      
       byModule[e.module] = (byModule[e.module] || 0) + 1;
       byAction[e.action] = (byAction[e.action] || 0) + 1;
       byUser[e.user] = (byUser[e.user] || 0) + 1;
@@ -210,7 +234,9 @@ const History = {
     };
 
     return {
-      today, last7,
+      today, 
+      last7, 
+      deletionsToday,
       topModule: top(byModule),
       topUser: top(byUser),
       byModule, byAction, byUser,
@@ -259,7 +285,6 @@ const History = {
     App.refresh();
   },
 
-  // ===================== PDF EXPORT =====================
   exportPDF() {
     const entries = this.getFiltered();
     if (!entries.length) return alert('No data to export.');
@@ -303,7 +328,6 @@ const History = {
     App.refresh();
   },
 
-  // ===================== EXCEL EXPORT =====================
   exportExcel() {
     const entries = this.getFiltered();
     if (!entries.length) return alert('No data to export.');
@@ -317,7 +341,6 @@ const History = {
     const stats = this.computeStats();
     const wb = XLSX.utils.book_new();
 
-    // Summary sheet
     const summaryData = [
       ['MALIBORA — Activity Log Summary'],
       ['Generated', new Date().toLocaleString('en-GB')],
@@ -338,7 +361,6 @@ const History = {
     ws1['!cols'] = [{ wch: 20 }, { wch: 30 }];
     XLSX.utils.book_append_sheet(wb, ws1, 'Summary');
 
-    // Activity Log sheet
     const logData = [['Time','Module','Action','Description','Reference','User']]
       .concat(entries.map(e => [e.ts, e.module, e.action, e.description, e.ref, e.user]));
     const ws2 = XLSX.utils.aoa_to_sheet(logData);
