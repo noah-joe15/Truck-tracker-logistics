@@ -1084,3 +1084,109 @@ img, svg, canvas, video {
   object-fit: contain;
   flex-shrink: 0;
 }
+
+/* ====== TRUCK DRIVE ANIMATION ====== */
+.truck-drive-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.95), rgba(30, 58, 138, 0.85));
+  z-index: 10000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.truck-drive-overlay.active {
+  display: flex;
+}
+
+.truck-animated {
+  position: absolute;
+  bottom: 20%;
+  left: -400px;
+  width: clamp(200px, 50vw, 400px);
+  height: auto;
+  animation: driveTruck 3.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.4));
+}
+
+@keyframes driveTruck {
+  0% {
+    left: -400px;
+    transform: translateY(0) rotate(0deg);
+  }
+  10% {
+    transform: translateY(-3px) rotate(-0.5deg);
+  }
+  20% {
+    transform: translateY(2px) rotate(0.3deg);
+  }
+  30% {
+    transform: translateY(-2px) rotate(-0.2deg);
+  }
+  40% {
+    transform: translateY(1px) rotate(0.1deg);
+  }
+  50% {
+    transform: translateY(-1px);
+  }
+  100% {
+    left: 110%;
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+/* Road line animation */
+.road-line {
+  position: absolute;
+  bottom: 18%;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(255,255,255,0.8) 0px,
+    rgba(255,255,255,0.8) 40px,
+    transparent 40px,
+    transparent 80px
+  );
+  animation: moveRoad 0.6s linear infinite;
+}
+
+@keyframes moveRoad {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-80px); }
+}
+
+/* Loading text */
+.drive-text {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  font-size: clamp(18px, 4vw, 28px);
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* Fade out animation for login card */
+.login-card.driving-away {
+  animation: fadeOutCard 0.5s ease forwards;
+}
+
+@keyframes fadeOutCard {
+  0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.95); }
+}
