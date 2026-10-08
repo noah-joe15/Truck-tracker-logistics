@@ -80,17 +80,24 @@ const Expenses = {
         </div>
       </div>
 
-      <!-- 2. MANAGE CATEGORIES -->
-      <div class="form-section" style="background: rgba(241, 245, 249, 0.5); border: 1px dashed var(--border);">
-        <div style="display: flex; gap: 10px; align-items: flex-end;">
-          <div class="form-group" style="flex: 1; margin: 0;">
-            <label><i class="fas fa-tags"></i> Add New Category</label>
-            <input type="text" id="newCategoryInput" class="input-field" placeholder="e.g., Car Wash, Lunch">
+      <!-- 2. MANAGE CATEGORIES - FIXED VERSION -->
+      <div class="form-section">
+        <h2><i class="fas fa-tags"></i> Manage Categories</h2>
+        <div style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 200px;">
+            <label style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: var(--text);">
+              <i class="fas fa-plus-circle" style="color: var(--primary);"></i> Add New Category
+            </label>
+            <input type="text" id="newCategoryInput" class="input-field" placeholder="e.g., Car Wash, Lunch, Tips" 
+                   style="width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px;">
           </div>
-          <button class="btn-primary" onclick="Expenses.addNewCategory()" style="margin: 0; padding: 11px 20px;">
-            <i class="fas fa-plus"></i> Add
+          <button class="btn-primary" onclick="Expenses.addNewCategory()" style="margin: 0; padding: 11px 24px; height: fit-content;">
+            <i class="fas fa-plus"></i> Add Category
           </button>
         </div>
+        <p style="margin-top: 10px; font-size: 12px; color: var(--text-light);">
+          <i class="fas fa-info-circle"></i> Current categories: ${this.categories.length}
+        </p>
       </div>
 
       <!-- 3. EXPENSE TRAY (MULTI-SELECT) -->
@@ -100,7 +107,7 @@ const Expenses = {
           Tick the boxes below for expenses incurred, then enter the cost for each.
         </p>
         
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; margin-bottom: 20px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-bottom: 20px;">
           ${this.categories.map(cat => {
             const isSelected = this.batchExpenses.hasOwnProperty(cat);
             const amount = this.batchExpenses[cat] || '';
@@ -251,6 +258,7 @@ const Expenses = {
     
     this.categories.push(val);
     input.value = '';
+    alert(`Category "${val}" added successfully!`);
     App.refresh(); // Re-render to show new checkbox
   },
 
@@ -267,17 +275,11 @@ const Expenses = {
   // Update amount for a specific category
   updateAmount(category, value) {
     this.batchExpenses[category] = Number(value) || 0;
-    // We don't refresh the whole app here to keep focus on the input, 
-    // but the total updates on the next render or via direct DOM manipulation if we wanted to be fancy.
-    // For simplicity, let's just trigger a refresh to update the Total Display.
-    // Actually, to keep focus, we should update the DOM directly.
-    const totalEl = document.querySelector('.form-section[style*="linear-gradient"] .fa-calculator');
-    if(totalEl) {
-       // This is a bit hacky, better to just refresh if performance allows, 
-       // but for a small app, let's just update the text node of the total.
-       const totalVal = Object.values(this.batchExpenses).reduce((a,b) => a + b, 0);
-       const totalDisplay = document.querySelector('.form-section[style*="linear-gradient"] div[style*="font-size: 28px"]');
-       if(totalDisplay) totalDisplay.innerText = Utils.fmtTZS(totalVal);
+    // Update the total display without full refresh
+    const totalVal = Object.values(this.batchExpenses).reduce((a,b) => a + b, 0);
+    const totalDisplay = document.querySelector('.form-section[style*="linear-gradient"] div[style*="font-size: 28px"]');
+    if(totalDisplay) {
+      totalDisplay.innerText = Utils.fmtTZS(totalVal);
     }
   },
 
