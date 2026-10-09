@@ -11,16 +11,19 @@ const Dashboard = {
     const pendingDebt = debts.filter(d => !d.paid).reduce((s, x) => s + Number(x.amount || 0), 0);
     const cashInHand = totalIncome - totalExpense;
 
-    // Fuel Analysis
-    const fuelExpenses = expenses.filter(e => e.category === 'Fuel (Diesel/Petrol)' || e.category === 'Fuel');
+      // Fuel Analysis
+    const fuelExpenses = expenses.filter(e => 
+      e.category === 'Fuel (Diesel/Petrol)' || e.category === 'Fuel'
+    );
     const totalFuelCost = fuelExpenses.reduce((s, x) => s + Number(x.amount || 0), 0);
-    const totalFuelLiters = fuelExpenses.reduce((s, x) => s + Number(x.liters || 0), 0);
     
-    // EWURA Standard Diesel Price per Liter (Tanzania) - Update this as needed
-    const DIESEL_PRICE_PER_LITER = 3430; // TZS per liter (EWURA standard price)
+    const DIESEL_PRICE_PER_LITER = 3430; 
     
-    // If liters not recorded, calculate from amount
-    const calculatedLiters = totalFuelLiters > 0 ? totalFuelLiters : (totalFuelCost / DIESEL_PRICE_PER_LITER);
+    // Calculate total liters: use recorded liters, or calculate from amount if missing
+    const totalFuelLiters = fuelExpenses.reduce((s, x) => {
+      const liters = Number(x.liters || 0);
+      return s + (liters > 0 ? liters : (Number(x.amount || 0) / DIESEL_PRICE_PER_LITER));
+    }, 0);
 
     return `
       <h1 class="section-title">${Icons.truck} Fleet Overview</h1>
