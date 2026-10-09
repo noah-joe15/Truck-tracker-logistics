@@ -6,6 +6,9 @@ const KPI = {
 
     const totalRev = income.reduce((s, x) => s + Number(x.amount || 0), 0);
     const totalExp = expenses.reduce((s, x) => s + Number(x.amount || 0), 0);
+    const tripExpenses = expenses
+      .filter(e => e.tripId || ['Fuel', 'Driver Allowance', 'Turnboy Allowance'].includes(e.category))
+      .reduce((s, x) => s + Number(x.amount || 0), 0);
     const totalKm  = trips.reduce((s, x) => s + Number(x.distance || 0), 0);
     
     // EWURA Diesel Price
@@ -39,6 +42,11 @@ const KPI = {
           <div class="kpi-icon-wrapper revenue"><i class="fas fa-dollar-sign"></i></div>
           <div class="kpi-label">Total Revenue</div>
           <div class="kpi-value">${Utils.fmtTZS(totalRev)}</div>
+        </div>
+        <div class="kpi-card cost">
+          <div class="kpi-icon-wrapper cost"><i class="fas fa-receipt"></i></div>
+          <div class="kpi-label">Trip Running Costs</div>
+          <div class="kpi-value">${Utils.fmtTZS(tripExpenses)}</div>
         </div>
         <div class="kpi-card kpi-hero profit">
           <div class="kpi-icon-wrapper profit"><i class="fas fa-coins"></i></div>
