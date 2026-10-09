@@ -11,7 +11,7 @@ const Dashboard = {
     const pendingDebt = debts.filter(d => !d.paid).reduce((s, x) => s + Number(x.amount || 0), 0);
     const cashInHand = totalIncome - totalExpense;
 
-      // Fuel Analysis
+         // Fuel Analysis
     const fuelExpenses = expenses.filter(e => 
       e.category === 'Fuel (Diesel/Petrol)' || e.category === 'Fuel'
     );
