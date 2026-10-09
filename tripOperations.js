@@ -4,12 +4,19 @@
 
 const TripOps = {
   brands: ['Scania', 'Howo', 'Fuso', 'Renault', 'Mercedes', 'Canter', 'Volvo', 'MAN'],
+  tripExpenses: [], // Store trip expenses temporarily
 
   render() {
     const trucks = DB.trucks();
     const drivers = DB.drivers();
     const customers = DB.customers();
     const trips = DB.trips().sort((a, b) => new Date(b.date) - new Date(a.date));
+    const tripExpenses = DB.tripExpenses ? DB.tripExpenses() : [];
+    
+    // Calculate totals for trip expenses
+    const totalExpenses = this.tripExpenses.reduce((sum, exp) => sum + Number(exp.amount || 0), 0);
+    const tripIncome = Number(document.getElementById('tripTotalPrice')?.value || 0);
+    const remainingAfterExpenses = tripIncome - totalExpenses;
 
     return `
       <div class="section-title">
@@ -211,6 +218,97 @@ const TripOps = {
           </button>
         </div>
 
+        <!-- ========== TRIP EXPENSES ========== -->
+        <div class="form-section" style="border: 2px solid var(--primary); background: linear-gradient(135deg, #f0f9ff, #e0f2fe);">
+          <h2><i class="fas fa-receipt"></i> Trip Expenses</h2>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label>Select Truck</label>
+              <select id="expTruck" class="input-field" onchange="TripOps.updateExpenseSummary()">
+                <option value="">-- Select Truck --</option>
+                ${trucks.map(t => `<option value="${t.id}">${t.plateNumber}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Expense Type</label>
+              <select id="expType" class="input-field" onchange="TripOps.handleExpenseTypeChange()">
+                <option value="">-- Select Expense --</option>
+                <option value="fuel">Fuel (Diesel/Petrol)</option>
+                <option value="driver_allowance">Driver Allowance</option>
+                <option value="turnboy_allowance">Turnboy Allowance</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Fuel Specific Fields -->
+          <div id="fuelFields" style="display: none;">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Amount (TZS)</label>
+                <input type="number" id="fuelAmount" class="input-field" placeholder="0.00" min="0" oninput="TripOps.calculateFuelLiters()">
+              </div>
+              <div class="form-group">
+                <label>Liters (Auto)</label>
+                <input type="text" id="fuelLiters" class="input-field" readonly placeholder="0.0 L" style="background-color: #f1f5f9;">
+              </div>
+            </div>
+            <p style="font-size: 12px; color: var(--text-light); margin: 4px 0 12px 0;">
+              <i class="fas fa-info-circle"></i> Based on EWURA price: 3,430 TZS/L
+            </p>
+          </div>
+
+          <!-- Allowance Fields -->
+          <div id="allowanceFields" style="display: none;">
+            <div class="form-group">
+              <label>Amount (TZS)</label>
+              <input type="number" id="allowanceAmount" class="input-field" placeholder="0.00" min="0">
+            </div>
+          </div>
+
+          <button class="btn-primary" onclick="TripOps.addTripExpense()" style="margin-top: 12px; width: 100%; background: linear-gradient(135deg, #f59e0b, #d97706);">
+            <i class="fas fa-plus"></i> Add Expense
+          </button>
+
+          <!-- Expense Summary -->
+          ${this.tripExpenses.length > 0 ? `
+            <div style="margin-top: 16px; padding: 12px; background: white; border-radius: 8px;">
+              <h3 style="margin: 0 0 12px 0; font-size: 14px; color: var(--primary-dark);">
+                <i class="fas fa-list"></i> Expenses for this Trip
+              </h3>
+              ${this.tripExpenses.map((exp, idx) => `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid var(--border);">
+                  <div>
+                    <strong style="font-size: 13px;">${exp.type}</strong>
+                    ${exp.liters ? `<div style="font-size: 11px; color: var(--text-light);">${exp.liters} L</div>` : ''}
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-weight: 700; color: var(--primary);">${Utils.fmtTZS(exp.amount)}</span>
+                    <button class="btn-danger" onclick="TripOps.removeTripExpense(${idx})" style="padding: 4px 8px; font-size: 11px;">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                </div>
+              `).join('')}
+              <div style="margin-top: 12px; padding-top: 12px; border-top: 2px solid var(--primary);">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                  <span style="font-weight: 600;">Total Expenses:</span>
+                  <span style="font-weight: 800; color: var(--danger);">${Utils.fmtTZS(totalExpenses)}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="font-weight: 600;">Remaining:</span>
+                  <span style="font-weight: 800; color: ${remainingAfterExpenses >= 0 ? 'var(--success)' : 'var(--danger)'};">
+                    ${Utils.fmtTZS(remainingAfterExpenses)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ` : ''}
+        </div>
+
       </div>
 
       <!-- ========== FULL WIDTH: TRIP HISTORY ========== -->
@@ -230,6 +328,96 @@ const TripOps = {
       </div>
     `;
   },
+
+  // ========== TRIP EXPENSE FUNCTIONS ==========
+  
+  handleExpenseTypeChange() {
+    const type = document.getElementById('expType').value;
+    const fuelFields = document.getElementById('fuelFields');
+    const allowanceFields = document.getElementById('allowanceFields');
+    
+    if (type === 'fuel') {
+      fuelFields.style.display = 'block';
+      allowanceFields.style.display = 'none';
+    } else if (type === 'driver_allowance' || type === 'turnboy_allowance') {
+      fuelFields.style.display = 'none';
+      allowanceFields.style.display = 'block';
+    } else {
+      fuelFields.style.display = 'none';
+      allowanceFields.style.display = 'none';
+    }
+  },
+
+  calculateFuelLiters() {
+    const amount = Number(document.getElementById('fuelAmount').value) || 0;
+    const DIESEL_PRICE = 3430; // EWURA price per liter
+    const liters = amount / DIESEL_PRICE;
+    document.getElementById('fuelLiters').value = liters.toFixed(1) + ' L';
+  },
+
+  addTripExpense() {
+    const truckId = document.getElementById('expTruck').value;
+    const expType = document.getElementById('expType').value;
+    
+    if (!truckId) return alert('Please select a truck.');
+    if (!expType) return alert('Please select an expense type.');
+
+    const trucks = DB.trucks();
+    const truck = trucks.find(t => t.id === truckId);
+    
+    let expense = {
+      truckId: truckId,
+      truckPlate: truck ? truck.plateNumber : 'Unknown',
+      type: '',
+      amount: 0,
+      liters: null
+    };
+
+    if (expType === 'fuel') {
+      const amount = Number(document.getElementById('fuelAmount').value);
+      if (!amount || amount <= 0) return alert('Please enter fuel amount.');
+      
+      expense.type = 'Fuel';
+      expense.amount = amount;
+      expense.liters = (amount / 3430).toFixed(1);
+      
+      document.getElementById('fuelAmount').value = '';
+      document.getElementById('fuelLiters').value = '';
+    } else if (expType === 'driver_allowance') {
+      const amount = Number(document.getElementById('allowanceAmount').value);
+      if (!amount || amount <= 0) return alert('Please enter allowance amount.');
+      
+      expense.type = 'Driver Allowance';
+      expense.amount = amount;
+      
+      document.getElementById('allowanceAmount').value = '';
+    } else if (expType === 'turnboy_allowance') {
+      const amount = Number(document.getElementById('allowanceAmount').value);
+      if (!amount || amount <= 0) return alert('Please enter allowance amount.');
+      
+      expense.type = 'Turnboy Allowance';
+      expense.amount = amount;
+      
+      document.getElementById('allowanceAmount').value = '';
+    }
+
+    this.tripExpenses.push(expense);
+    document.getElementById('expType').value = '';
+    this.handleExpenseTypeChange();
+    App.refresh();
+  },
+
+  removeTripExpense(index) {
+    this.tripExpenses.splice(index, 1);
+    App.refresh();
+  },
+
+  updateExpenseSummary() {
+    // This will be called when needed to refresh the summary
+    App.refresh();
+  },
+
+  // ========== EXISTING FUNCTIONS ==========
 
   renderTrailerPlates() {
     const count = Number(document.getElementById('truckTrailersCount').value) || 0;
@@ -443,6 +631,36 @@ const TripOps = {
     
     if (typeof logActivity === 'function') {
       logActivity({ module: 'trips', action: 'create', description: `Trip ${trip.from} to ${trip.to}`, ref: trip.truckId, user: 'admin' });
+    }
+
+    // Save trip expenses if any
+    if (this.tripExpenses.length > 0) {
+      this.tripExpenses.forEach(exp => {
+        DB.push('expenses', {
+          date: trip.date,
+          truckId: exp.truckId,
+          driverId: trip.driverId,
+          category: exp.type,
+          amount: exp.amount,
+          liters: exp.liters,
+          method: 'Cash',
+          description: `Trip expense: ${exp.type} for ${trip.from} to ${trip.to}`,
+          tripId: trip.id
+        });
+      });
+      
+      if (typeof logActivity === 'function') {
+        logActivity({ 
+          module: 'expenses', 
+          action: 'create', 
+          description: `Added ${this.tripExpenses.length} trip expenses`, 
+          ref: trip.truckId, 
+          user: 'admin' 
+        });
+      }
+      
+      // Clear trip expenses after saving
+      this.tripExpenses = [];
     }
 
     if (paidAmount > 0) {
