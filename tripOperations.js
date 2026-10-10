@@ -11,12 +11,9 @@ const TripOps = {
     const drivers = DB.drivers();
     const customers = DB.customers();
     const trips = DB.trips().sort((a, b) => new Date(b.date) - new Date(a.date));
-    const tripExpenses = DB.tripExpenses ? DB.tripExpenses() : [];
     
-    // Calculate totals for trip expenses
+    // Calculate totals for trip expenses safely (without reading DOM during render)
     const totalExpenses = this.tripExpenses.reduce((sum, exp) => sum + Number(exp.amount || 0), 0);
-    const tripIncome = Number(document.getElementById('tripTotalPrice')?.value || 0);
-    const remainingAfterExpenses = tripIncome - totalExpenses;
 
     return `
       <div class="section-title">
@@ -294,16 +291,13 @@ const TripOps = {
                 </div>
               `).join('')}
               <div style="margin-top: 12px; padding-top: 12px; border-top: 2px solid var(--primary);">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                  <span style="font-weight: 600;">Total Expenses:</span>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="font-weight: 600;">Total Trip Expenses:</span>
                   <span style="font-weight: 800; color: var(--danger);">${Utils.fmtTZS(totalExpenses)}</span>
                 </div>
-                <div style="display: flex; justify-content: space-between;">
-                  <span style="font-weight: 600;">Remaining:</span>
-                  <span style="font-weight: 800; color: ${remainingAfterExpenses >= 0 ? 'var(--success)' : 'var(--danger)'};">
-                    ${Utils.fmtTZS(remainingAfterExpenses)}
-                  </span>
-                </div>
+                <p style="font-size: 11px; color: var(--text-light); margin: 8px 0 0 0; text-align: right;">
+                  <i class="fas fa-info-circle"></i> Deducted from trip revenue upon saving.
+                </p>
               </div>
             </div>
           ` : ''}
@@ -413,7 +407,6 @@ const TripOps = {
   },
 
   updateExpenseSummary() {
-    // This will be called when needed to refresh the summary
     App.refresh();
   },
 
@@ -607,20 +600,24 @@ const TripOps = {
     const driverId = document.getElementById('tripDriver').value;
     const customerId = document.getElementById('tripCustomer').value;
 
+    // Generate a guaranteed unique ID for the trip
+    const tripId = 'trip_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+
     const trip = {
+      id: tripId, // Explicitly set ID
       date: document.getElementById('tripDate').value,
       truckId: truckId,
       driverId: driverId,
       customerId: customerId,
-      type: document.getElementById('tripType').value,
-      loadStatus: document.getElementById('tripLoad').value,
+      type: 'Single Trip',
+      loadStatus: 'Loaded',
       from: document.getElementById('tripFrom').value,
       to: document.getElementById('tripTo').value,
       distance: document.getElementById('tripDist').value,
       totalPrice: totalPrice,
       paidAmount: paidAmount,
-      status: document.getElementById('tripStatus').value,
-      onTime: document.getElementById('tripOnTime').value === '1'
+      status: 'In Transit',
+      onTime: true
     };
 
     if (!trip.truckId) return alert('Please select a truck.');
@@ -645,7 +642,7 @@ const TripOps = {
           liters: exp.liters,
           method: 'Cash',
           description: `Trip expense: ${exp.type} for ${trip.from} to ${trip.to}`,
-          tripId: trip.id
+          tripId: trip.id // Now guaranteed to exist!
         });
       });
       
@@ -683,12 +680,12 @@ const TripOps = {
       });
     }
 
-    alert('Trip saved successfully! Income and/or Debt records updated automatically.');
+    alert('Trip saved successfully! Income, Expenses, and/or Debt records updated automatically.');
     App.refresh();
   },
 
   deleteTrip(id) {
-    if (confirm('Delete this trip? Note: This will NOT automatically reverse associated income or debt records.')) {
+    if (confirm('Delete this trip? Note: This will NOT automatically reverse associated income, expense, or debt records.')) {
       DB.remove('trips', id);
       if (typeof logActivity === 'function') {
         logActivity({ module: 'trips', action: 'delete', description: `Deleted trip ${id}`, ref: id, user: 'admin' });
