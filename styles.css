@@ -1190,33 +1190,3 @@ img, svg, canvas, video {
   0% { opacity: 1; transform: scale(1); }
   100% { opacity: 0; transform: scale(0.95); }
 }
-
-/* Floating Action Button for desktop */
-@media (min-width: 860px) {
-  .btn-primary {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    width: auto !important;
-    padding: 14px 28px !important;
-    border-radius: 50px !important;
-    box-shadow: 0 4px 20px rgba(30, 64, 175, 0.4) !important;
-    z-index: 1000;
-    font-size: 15px !important;
-  }
-  
-  .btn-primary:hover {
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 6px 24px rgba(30, 64, 175, 0.5) !important;
-  }
-}
-
-/* Mobile - keep in header */
-@media (max-width: 859px) {
-  .btn-primary {
-    position: static !important;
-    width: 100% !important;
-    border-radius: 8px !important;
-    box-shadow: none !important;
-  }
-}
