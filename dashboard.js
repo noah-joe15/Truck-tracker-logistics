@@ -9,8 +9,7 @@ const Dashboard = {
     const totalIncome = income.reduce((s, x) => s + Number(x.amount || 0), 0);
     const totalExpense = expenses.reduce((s, x) => s + Number(x.amount || 0), 0);
     const pendingDebt = debts.filter(d => !d.paid).reduce((s, x) => s + Number(x.amount || 0), 0);
-    const cashInHand = totalIncome - totalExpense;
-
+    
     const inTransit = trips.filter(t => t.status === 'In Transit');
     const needsAttention = trucks.filter(t => {
       const compliance = DB.compliance ? DB.compliance().filter(c => c.truckId === t.id && c.daysUntilExpiry <= 30) : [];
@@ -23,32 +22,6 @@ const Dashboard = {
     return `
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
-        
-        :root {
-          --bg: #f2f3f5;
-          --surface: #ffffff;
-          --ink: #12161d;
-          --muted: #5d6675;
-          --line: #e0e3e8;
-          --accent: #1b44c8;
-          --neutral: #c9ccd3;
-          --warning: #a15c07;
-          --success: #059669;
-        }
-        
-        @media (prefers-color-scheme: dark) {
-          :root {
-            --bg: #0f1218;
-            --surface: #161a22;
-            --ink: #eceef2;
-            --muted: #98a1b0;
-            --line: #262c37;
-            --accent: #7c9bff;
-            --neutral: #3a4150;
-            --warning: #e0a24a;
-            --success: #10b981;
-          }
-        }
         
         * {
           font-family: 'Hanken Grotesk', system-ui, -apple-system, sans-serif;
@@ -65,37 +38,38 @@ const Dashboard = {
         
         .dashboard-header h1 {
           font-size: 24px;
-          font-weight: 600;
-          color: var(--ink);
+          font-weight: 700;
+          color: #1e3a8a;
           margin: 0 0 8px 0;
           letter-spacing: -0.5px;
         }
         
         .dashboard-status {
           font-size: 13px;
-          color: var(--muted);
+          color: #64748b;
           line-height: 1.5;
+          font-weight: 500;
         }
         
         .dashboard-status .warning-count {
-          color: var(--warning);
+          color: #dc2626;
           font-weight: 600;
         }
         
         .btn-primary {
-          background: var(--accent);
-          color: white;
+          background: #1e40af;
+          color: #ffffff;
           border: none;
-          border-radius: 10px;
+          border-radius: 8px;
           padding: 10px 20px;
           font-size: 14px;
           font-weight: 600;
           cursor: pointer;
-          transition: opacity 0.2s;
+          transition: background-color 0.2s;
         }
         
         .btn-primary:hover {
-          opacity: 0.9;
+          background: #1e3a8a;
         }
         
         .dashboard-grid {
@@ -105,8 +79,8 @@ const Dashboard = {
         }
         
         .panel {
-          background: var(--surface);
-          border: 1px solid var(--line);
+          background: #ffffff;
+          border: 1px solid #e0e3e8;
           border-radius: 10px;
           padding: 20px;
           margin-bottom: 20px;
@@ -118,20 +92,23 @@ const Dashboard = {
           align-items: center;
           margin-bottom: 16px;
           padding-bottom: 12px;
-          border-bottom: 1px solid var(--line);
+          border-bottom: 1px solid #e0e3e8;
         }
         
         .panel-title {
           font-size: 15px;
           font-weight: 600;
-          color: var(--ink);
+          color: #1e3a8a;
           margin: 0;
         }
         
         .panel-count {
           font-size: 13px;
-          color: var(--muted);
+          color: #64748b;
           font-weight: 500;
+          background: #f1f5f9;
+          padding: 4px 10px;
+          border-radius: 6px;
         }
         
         .trip-row {
@@ -139,7 +116,7 @@ const Dashboard = {
           grid-template-columns: 2fr 1.5fr 1.5fr 1fr;
           gap: 16px;
           padding: 14px 0;
-          border-bottom: 1px solid var(--line);
+          border-bottom: 1px solid #f1f5f9;
           align-items: center;
         }
         
@@ -149,31 +126,31 @@ const Dashboard = {
         
         .trip-id {
           font-weight: 600;
-          color: var(--ink);
+          color: #0f172a;
           font-size: 14px;
           margin-bottom: 4px;
         }
         
         .trip-route {
           font-size: 13px;
-          color: var(--muted);
+          color: #64748b;
         }
         
         .truck-plate {
           font-weight: 600;
-          color: var(--ink);
+          color: #0f172a;
           font-size: 14px;
           margin-bottom: 2px;
         }
         
         .truck-driver {
           font-size: 12px;
-          color: var(--muted);
+          color: #64748b;
         }
         
         .progress-track {
           height: 6px;
-          background: var(--neutral);
+          background: #e0e3e8;
           border-radius: 3px;
           overflow: hidden;
           margin-bottom: 4px;
@@ -181,25 +158,25 @@ const Dashboard = {
         
         .progress-fill {
           height: 100%;
-          background: var(--accent);
+          background: #1e40af;
           border-radius: 3px;
         }
         
         .progress-text {
           font-size: 12px;
-          color: var(--muted);
+          color: #64748b;
           text-align: right;
         }
         
         .arrival-time {
           font-size: 13px;
-          color: var(--ink);
+          color: #0f172a;
           font-weight: 500;
         }
         
         .activity-item {
           padding: 12px 0;
-          border-bottom: 1px solid var(--line);
+          border-bottom: 1px solid #f1f5f9;
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
@@ -212,18 +189,18 @@ const Dashboard = {
         .activity-title {
           font-size: 14px;
           font-weight: 500;
-          color: var(--ink);
+          color: #0f172a;
           margin-bottom: 2px;
         }
         
         .activity-detail {
           font-size: 13px;
-          color: var(--muted);
+          color: #64748b;
         }
         
         .activity-time {
           font-size: 12px;
-          color: var(--muted);
+          color: #94a3b8;
           white-space: nowrap;
           margin-left: 12px;
         }
@@ -233,7 +210,7 @@ const Dashboard = {
           justify-content: space-between;
           align-items: center;
           padding: 12px 0;
-          border-bottom: 1px solid var(--line);
+          border-bottom: 1px solid #f1f5f9;
         }
         
         .fleet-item:last-child {
@@ -250,34 +227,37 @@ const Dashboard = {
           width: 8px;
           height: 8px;
           border-radius: 50%;
-          background: var(--neutral);
+          background: #cbd5e1;
         }
         
         .status-dot.in-transit {
-          background: var(--accent);
+          background: #1e40af;
         }
         
         .status-dot.needs-attention {
-          background: var(--warning);
+          background: #dc2626;
         }
         
         .fleet-plate {
           font-weight: 600;
-          color: var(--ink);
+          color: #0f172a;
           font-size: 14px;
         }
         
         .fleet-status {
           font-size: 13px;
-          color: var(--muted);
+          color: #64748b;
           text-align: right;
         }
         
         .empty-state {
           text-align: center;
-          padding: 40px 20px;
-          color: var(--muted);
+          padding: 32px 20px;
+          color: #64748b;
           font-size: 14px;
+          background: #f8fafc;
+          border-radius: 8px;
+          border: 1px dashed #e0e3e8;
         }
         
         @media (max-width: 860px) {
@@ -319,7 +299,7 @@ const Dashboard = {
               return `
                 <div class="trip-row">
                   <div>
-                    <div class="trip-id">${Utils.esc(trip.id.slice(0, 8).toUpperCase())}</div>
+                    <div class="trip-id">${Utils.esc(trip.id ? trip.id.slice(0, 8).toUpperCase() : 'TRIP')}</div>
                     <div class="trip-route">${Utils.esc(trip.from)} → ${Utils.esc(trip.to)}</div>
                   </div>
                   <div>
@@ -416,7 +396,7 @@ const Dashboard = {
     });
     
     if (activities.length === 0) {
-      return '<div class="empty-state">No recent activity.</div>';
+      return '<div class="empty-state">No recent activity recorded yet.</div>';
     }
     
     return activities.map(a => `
@@ -444,13 +424,13 @@ const Dashboard = {
     });
     
     if (items.length === 0) {
-      return '<div class="empty-state" style="color: var(--success);">Everything is up to date.</div>';
+      return '<div class="empty-state" style="color: #16a34a; background: #f0fdf4; border-color: #bbf7d0;">Everything is up to date.</div>';
     }
     
     return items.map(item => `
       <div class="activity-item">
         <div>
-          <div class="activity-title" style="color: var(--warning);">${item.title}</div>
+          <div class="activity-title" style="color: #dc2626; font-weight: 600;">${item.title}</div>
           <div class="activity-detail">${item.detail}</div>
         </div>
       </div>
