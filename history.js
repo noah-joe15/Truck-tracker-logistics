@@ -105,9 +105,9 @@ const History = {
             Activity Log <span style="color:var(--text-light); font-weight:500; font-size:13px;">(${entries.length} results)</span>
           </h3>
           <div class="export-btns">
-            <button class="btn-icon-action" onclick="History.exportPDF()">
-              <svg style="width:16px;height:16px"><use href="#i-file"/></svg> PDF
-            </button>
+            <button class="btn-icon-action" onclick="History.exportBusinessReport()">
+  <svg style="width:16px;height:16px"><use href="#i-file"/></svg> Business Report
+</button>
             <button class="btn-icon-action" onclick="History.exportExcel()">
               <svg style="width:16px;height:16px"><use href="#i-table"/></svg> Excel
             </button>
@@ -285,89 +285,154 @@ const History = {
     App.refresh();
   },
 
-  exportPDF() {
-    const entries = this.getFiltered();
-    if (!entries.length) return alert('No data to export.');
+    exportBusinessReport() {
+    const trips = DB.trips();
+    const income = DB.income();
+    const expenses = DB.expenses();
+    const trucks = DB.trucks();
+    const drivers = DB.drivers();
 
-    logActivity({
-      module: 'history', action: 'export',
-      description: 'Exported activity log as PDF',
-      ref: `${entries.length} rows`, user: 'admin'
-    });
+    // 1. Calculate KPIs
+    const totalRevenue = income.reduce((s, x) => s + Number(x.amount || 0), 0);
+    const totalExpenses = expenses.reduce((s, x) => s + Number(x.amount || 0), 0);
+    const netProfit = totalRevenue - totalExpenses;
+    const totalKm = trips.reduce((s, x) => s + Number(x.distance || 0), 0);
+    
+    const fuelExpenses = expenses.filter(e => e.category === 'Fuel (Diesel/Petrol)' || e.category === 'Fuel');
+    const totalFuelCost = fuelExpenses.reduce((s, x) => s + Number(x.amount || 0), 0);
+    const totalFuelLiters = fuelExpenses.reduce((s, x) => {
+      const liters = Number(x.liters || 0);
+      return s + (liters > 0 ? liters : (Number(x.amount || 0) / 3430));
+    }, 0);
 
+    const avgKmL = totalFuelLiters > 0 ? (totalKm / totalFuelLiters).toFixed(2) : '0.00';
+    const costPer100km = totalKm > 0 ? Math.round((totalExpenses / totalKm) * 100) : 0;
+
+    // 2. Initialize PDF
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-    const stats = this.computeStats();
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const pageWidth = doc.internal.pageSize.getWidth();
 
-    doc.setFontSize(18); doc.setTextColor(30, 58, 138);
-    doc.text('MALIBORA — Activity Log', 14, 16);
-    doc.setFontSize(10); doc.setTextColor(100);
-    doc.text(`Generated: ${new Date().toLocaleString('en-GB')}`, 14, 22);
-    doc.text(`Period: ${this.filters.from || 'start'} to ${this.filters.to || 'now'}  |  Total: ${entries.length}`, 14, 27);
+    // 3. Header
+    doc.setFillColor(30, 58, 138);
+    doc.rect(0, 0, pageWidth, 40, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(22);
+    doc.setFont('helvetica', 'bold');
+    doc.text('MALIBORA LOGISTICS', 14, 18);
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Business Performance Report', 14, 26);
+    doc.setFontSize(10);
+    doc.text(`Generated: ${new Date().toLocaleString('en-GB')}`, 14, 34);
+    doc.text(`Period: All Time`, pageWidth - 14, 34, { align: 'right' });
+
+    let yPos = 50;
+
+    // 4. Executive Summary (KPIs)
+    doc.setTextColor(30, 58, 138);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Executive Summary', 14, yPos);
+    yPos += 8;
+
+    const kpiData = [
+      ['Total Revenue', Utils.fmtTZS(totalRevenue)],
+      ['Trip Running Costs', Utils.fmtTZS(totalExpenses)],
+      ['Net Profit', Utils.fmtTZS(netProfit)],
+      ['Total Distance', `${Utils.fmtNum(totalKm)} Km`],
+      ['Average KM/L', `${avgKmL} L`],
+      ['Cost per 100 Km', Utils.fmtTZS(costPer100km)],
+      ['Active Trucks', trucks.length.toString()],
+      ['Total Trips', trips.length.toString()]
+    ];
 
     doc.autoTable({
-      startY: 32,
-      head: [['Time', 'Module', 'Action', 'Description', 'Reference', 'User']],
-      body: entries.map(e => [
-        e.ts.replace('T',' ').slice(0,16),
-        e.module, e.action, e.description, e.ref, e.user
-      ]),
-      styles: { fontSize: 8, cellPadding: 2 },
-      headStyles: { fillColor: [30, 58, 138] },
-      alternateRowStyles: { fillColor: [241, 245, 249] }
+      startY: yPos,
+      head: [['Metric', 'Value']],
+      body: kpiData,
+      theme: 'grid',
+      headStyles: { fillColor: [30, 58, 138], textColor: 255, fontStyle: 'bold' },
+      styles: { fontSize: 10, cellPadding: 3 },
+      columnStyles: {
+        0: { fontStyle: 'bold', width: 70 },
+        1: { halign: 'right', fontStyle: 'bold' }
+      }
+    });
+    yPos = doc.lastAutoTable.finalY + 15;
+
+    // 5. Driver Accountability Table
+    if (yPos > 250) {
+      doc.addPage();
+      yPos = 20;
+    }
+
+    doc.setTextColor(30, 58, 138);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Driver Accountability', 14, yPos);
+    yPos += 8;
+
+    const driverTableData = drivers.map(d => {
+      const truck = trucks.find(t => t.id === d.truckId);
+      const dTrips = trips.filter(t => t.driverId === d.id);
+      const dKm = dTrips.reduce((s, x) => s + Number(x.distance || 0), 0);
+      const dRev = income.filter(x => x.driverId === d.id).reduce((s, x) => s + Number(x.amount || 0), 0);
+      const dFuel = expenses.filter(e => e.driverId === d.id && (e.category === 'Fuel (Diesel/Petrol)' || e.category === 'Fuel'))
+                            .reduce((s, x) => {
+                              const liters = Number(x.liters || 0);
+                              return s + (liters > 0 ? liters : (Number(x.amount || 0) / 3430));
+                            }, 0);
+      const dEco = dFuel > 0 ? (dKm / dFuel).toFixed(1) : '0.0';
+
+      return [
+        Utils.esc(d.name),
+        truck ? Utils.esc(truck.plateNumber) : 'Unassigned',
+        dTrips.length.toString(),
+        Utils.fmtNum(dKm),
+        Utils.fmtTZS(dRev),
+        dFuel.toFixed(1) + ' L',
+        dEco
+      ];
     });
 
+    doc.autoTable({
+      startY: yPos,
+      head: [['Driver', 'Truck', 'Trips', 'Total Km', 'Revenue', 'Fuel Used', 'KM/L']],
+      body: driverTableData,
+      theme: 'striped',
+      headStyles: { fillColor: [30, 58, 138], textColor: 255, fontStyle: 'bold' },
+      styles: { fontSize: 9, cellPadding: 3 },
+      columnStyles: {
+        4: { halign: 'right' },
+        5: { halign: 'right' },
+        6: { halign: 'right' }
+      }
+    });
+
+    // 6. Footer on all pages
     const totalPages = doc.internal.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
       doc.setPage(i);
-      doc.setFontSize(8); doc.setTextColor(120);
-      doc.text(`Page ${i} of ${totalPages}`, doc.internal.pageSize.getWidth() - 30, doc.internal.pageSize.getHeight() - 8);
+      doc.setFontSize(8);
+      doc.setTextColor(150);
+      doc.setFont('helvetica', 'normal');
+      doc.text('MALIBORA International Logistics Truck Management System', 14, doc.internal.pageSize.getHeight() - 10);
+      doc.text(`Page ${i} of ${totalPages}`, pageWidth - 14, doc.internal.pageSize.getHeight() - 10, { align: 'right' });
     }
 
-    doc.save(`malibora-activity-${Utils.today()}.pdf`);
+    // 7. Save and Log
+    doc.save(`malibora-business-report-${Utils.today()}.pdf`);
+    
+    if (typeof logActivity === 'function') {
+      logActivity({
+        module: 'history',
+        action: 'export',
+        description: 'Exported Business Performance Report as PDF',
+        ref: 'Business Report',
+        user: 'admin'
+      });
+    }
+    
     App.refresh();
   },
-
-  exportExcel() {
-    const entries = this.getFiltered();
-    if (!entries.length) return alert('No data to export.');
-
-    logActivity({
-      module: 'history', action: 'export',
-      description: 'Exported activity log as Excel',
-      ref: `${entries.length} rows`, user: 'admin'
-    });
-
-    const stats = this.computeStats();
-    const wb = XLSX.utils.book_new();
-
-    const summaryData = [
-      ['MALIBORA — Activity Log Summary'],
-      ['Generated', new Date().toLocaleString('en-GB')],
-      ['Total Activities', ActivityLog.all().length],
-      ['Filtered Rows', entries.length],
-      ['Today', stats.today],
-      ['Last 7 Days', stats.last7],
-      ['Top Module', stats.topModule || '—'],
-      ['Top User', stats.topUser || '—'],
-      [],
-      ['By Module'],
-      ...Object.entries(stats.byModule).sort((a,b)=>b[1]-a[1]),
-      [],
-      ['By Action'],
-      ...Object.entries(stats.byAction).sort((a,b)=>b[1]-a[1])
-    ];
-    const ws1 = XLSX.utils.aoa_to_sheet(summaryData);
-    ws1['!cols'] = [{ wch: 20 }, { wch: 30 }];
-    XLSX.utils.book_append_sheet(wb, ws1, 'Summary');
-
-    const logData = [['Time','Module','Action','Description','Reference','User']]
-      .concat(entries.map(e => [e.ts, e.module, e.action, e.description, e.ref, e.user]));
-    const ws2 = XLSX.utils.aoa_to_sheet(logData);
-    ws2['!cols'] = [{ wch: 22 }, { wch: 14 }, { wch: 10 }, { wch: 40 }, { wch: 20 }, { wch: 12 }];
-    XLSX.utils.book_append_sheet(wb, ws2, 'Activity Log');
-
-    XLSX.writeFile(wb, `malibora-activity-${Utils.today()}.xlsx`);
-    App.refresh();
-  }
-};
