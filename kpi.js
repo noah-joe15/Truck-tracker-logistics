@@ -45,30 +45,6 @@ const KPI = {
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
         
-        :root {
-          --bg: #f2f3f5;
-          --surface: #ffffff;
-          --ink: #12161d;
-          --muted: #5d6675;
-          --line: #e0e3e8;
-          --accent: #1b44c8;
-          --neutral: #c9ccd3;
-          --warning: #a15c07;
-        }
-        
-        @media (prefers-color-scheme: dark) {
-          :root {
-            --bg: #0f1218;
-            --surface: #161a22;
-            --ink: #eceef2;
-            --muted: #98a1b0;
-            --line: #262c37;
-            --accent: #7c9bff;
-            --neutral: #3a4150;
-            --warning: #e0a24a;
-          }
-        }
-        
         * {
           font-family: 'Hanken Grotesk', system-ui, -apple-system, sans-serif;
           font-variant-numeric: tabular-nums;
@@ -78,66 +54,121 @@ const KPI = {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 28px;
+          margin-bottom: 24px;
           padding-bottom: 16px;
-          border-bottom: 1px solid var(--line);
+          border-bottom: 2px solid #e0e3e8;
         }
         
         .kpi-header h1 {
           font-size: 20px;
           font-weight: 600;
-          color: var(--ink);
+          color: #1e3a8a;
           margin: 0;
           letter-spacing: -0.3px;
         }
         
         .kpi-date {
           font-size: 13px;
-          color: var(--muted);
+          color: #64748b;
+          font-weight: 500;
+        }
+        
+        .kpi-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 16px;
+          margin-bottom: 24px;
+        }
+        
+        .kpi-card {
+          background: #ffffff;
+          border: 1px solid #e0e3e8;
+          border-radius: 10px;
+          padding: 20px;
+          transition: box-shadow 0.2s;
+        }
+        
+        .kpi-card:hover {
+          box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        
+        .kpi-label {
+          font-size: 13px;
+          font-weight: 500;
+          color: #64748b;
+          margin-bottom: 8px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        
+        .kpi-value {
+          font-size: 28px;
+          font-weight: 700;
+          color: #1e3a8a;
+          letter-spacing: -0.5px;
+          line-height: 1.1;
+        }
+        
+        .kpi-value.revenue { color: #16a34a; }
+        .kpi-value.cost { color: #f59e0b; }
+        .kpi-value.profit { color: #1e40af; }
+        .kpi-value.warning { color: #dc2626; }
+        
+        .kpi-sub {
+          font-size: 12px;
+          color: #94a3b8;
+          margin-top: 6px;
         }
         
         .hero-panel {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 0;
-          background: var(--surface);
-          border: 1px solid var(--line);
+          background: #ffffff;
+          border: 1px solid #e0e3e8;
           border-radius: 10px;
-          margin-bottom: 20px;
+          margin-bottom: 24px;
           overflow: hidden;
         }
         
         .hero-left {
           padding: 28px;
-          border-right: 1px solid var(--line);
+          border-right: 1px solid #e0e3e8;
         }
         
         .hero-label {
           font-size: 13px;
           font-weight: 500;
-          color: var(--muted);
+          color: #64748b;
           margin-bottom: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
         }
         
         .hero-value {
-          font-size: clamp(34px, 5vw, 52px);
-          font-weight: 600;
-          color: var(--accent);
+          font-size: clamp(32px, 4vw, 48px);
+          font-weight: 700;
+          color: #1e40af;
           letter-spacing: -1.5px;
           line-height: 1;
           margin-bottom: 8px;
         }
         
         .hero-value .currency {
-          font-size: 0.6em;
+          font-size: 0.55em;
           margin-left: 8px;
-          color: var(--muted);
+          color: #64748b;
           font-weight: 500;
         }
         
         .hero-margin {
           font-size: 13px;
-          color: var(--muted);
+          color: #64748b;
+        }
+        
+        .hero-margin strong {
+          color: #16a34a;
+          font-weight: 600;
         }
         
         .hero-right {
@@ -146,7 +177,7 @@ const KPI = {
         
         .revenue-bar {
           height: 14px;
-          background: var(--neutral);
+          background: #e0e3e8;
           border-radius: 7px;
           overflow: hidden;
           margin-bottom: 12px;
@@ -154,7 +185,7 @@ const KPI = {
         
         .revenue-fill {
           height: 100%;
-          background: var(--accent);
+          background: #1e40af;
           width: ${profitMargin}%;
           border-radius: 7px;
         }
@@ -172,40 +203,40 @@ const KPI = {
         }
         
         .legend-label {
-          color: var(--muted);
+          color: #64748b;
         }
         
         .legend-value {
           font-weight: 600;
-          color: var(--ink);
+          color: #1e3a8a;
         }
         
         .legend-row.total {
           padding-top: 8px;
-          border-top: 1px solid var(--line);
+          border-top: 1px solid #e0e3e8;
           margin-top: 4px;
         }
         
         .section-title {
           font-size: 15px;
           font-weight: 600;
-          color: var(--ink);
-          margin: 28px 0 16px 0;
+          color: #1e3a8a;
+          margin: 24px 0 16px 0;
         }
         
         .efficiency-panel {
-          background: var(--surface);
-          border: 1px solid var(--line);
+          background: #ffffff;
+          border: 1px solid #e0e3e8;
           border-radius: 10px;
           display: grid;
           grid-template-columns: repeat(4, 1fr);
-          margin-bottom: 20px;
+          margin-bottom: 24px;
           overflow: hidden;
         }
         
         .efficiency-item {
           padding: 24px;
-          border-right: 1px solid var(--line);
+          border-right: 1px solid #e0e3e8;
         }
         
         .efficiency-item:last-child {
@@ -215,29 +246,31 @@ const KPI = {
         .efficiency-label {
           font-size: 13px;
           font-weight: 500;
-          color: var(--muted);
+          color: #64748b;
           margin-bottom: 8px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
         }
         
         .efficiency-value {
           font-size: 24px;
-          font-weight: 600;
-          color: var(--ink);
+          font-weight: 700;
+          color: #1e3a8a;
           letter-spacing: -0.5px;
           margin-bottom: 4px;
         }
         
         .efficiency-note {
           font-size: 12px;
-          color: var(--muted);
+          color: #94a3b8;
         }
         
         .fleet-panel {
-          background: var(--surface);
-          border: 1px solid var(--line);
+          background: #ffffff;
+          border: 1px solid #e0e3e8;
           border-radius: 10px;
           padding: 24px;
-          margin-bottom: 20px;
+          margin-bottom: 24px;
         }
         
         .fleet-header {
@@ -250,12 +283,12 @@ const KPI = {
         .fleet-title {
           font-size: 15px;
           font-weight: 600;
-          color: var(--ink);
+          color: #1e3a8a;
         }
         
         .fleet-util {
           font-size: 13px;
-          color: var(--muted);
+          color: #64748b;
         }
         
         .fleet-bar {
@@ -268,16 +301,16 @@ const KPI = {
         
         .fleet-segment {
           height: 100%;
-          background: var(--neutral);
+          background: #e0e3e8;
         }
         
         .fleet-segment.active {
-          background: var(--accent);
+          background: #1e40af;
         }
         
         .fleet-summary {
           font-size: 13px;
-          color: var(--muted);
+          color: #64748b;
         }
         
         .chart-grid {
@@ -287,8 +320,8 @@ const KPI = {
         }
         
         .chart-box {
-          background: var(--surface);
-          border: 1px solid var(--line);
+          background: #ffffff;
+          border: 1px solid #e0e3e8;
           border-radius: 10px;
           padding: 20px;
         }
@@ -296,7 +329,7 @@ const KPI = {
         .chart-title {
           font-size: 14px;
           font-weight: 600;
-          color: var(--ink);
+          color: #1e3a8a;
           margin: 0 0 16px 0;
         }
         
@@ -307,7 +340,7 @@ const KPI = {
           
           .hero-left {
             border-right: none;
-            border-bottom: 1px solid var(--line);
+            border-bottom: 1px solid #e0e3e8;
           }
           
           .efficiency-panel {
@@ -325,6 +358,10 @@ const KPI = {
           .chart-grid {
             grid-template-columns: 1fr;
           }
+          
+          .kpi-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
         }
       </style>
       
@@ -333,11 +370,36 @@ const KPI = {
         <div class="kpi-date">${today}</div>
       </div>
       
+      <!-- TOP KPI CARDS -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">Total Revenue</div>
+          <div class="kpi-value revenue">${Utils.fmtTZS(totalRev)}</div>
+          <div class="kpi-sub">Gross income from trips</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Trip Running Costs</div>
+          <div class="kpi-value cost">${Utils.fmtTZS(tripExpenses)}</div>
+          <div class="kpi-sub">Fuel, driver & turnboy allowances</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Net Profit</div>
+          <div class="kpi-value profit">${Utils.fmtTZS(netProfit)}</div>
+          <div class="kpi-sub">Revenue minus all expenses</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Total Expenses</div>
+          <div class="kpi-value cost">${Utils.fmtTZS(totalExp)}</div>
+          <div class="kpi-sub">All operational costs</div>
+        </div>
+      </div>
+      
+      <!-- HERO PANEL: Profit Breakdown -->
       <div class="hero-panel">
         <div class="hero-left">
           <div class="hero-label">Net profit</div>
           <div class="hero-value">${Utils.fmtTZS(netProfit)}<span class="currency">TZS</span></div>
-          <div class="hero-margin">Profit margin ${profitMargin}%</div>
+          <div class="hero-margin">Profit margin <strong>${profitMargin}%</strong></div>
         </div>
         <div class="hero-right">
           <div class="hero-label">Where revenue went</div>
@@ -361,6 +423,7 @@ const KPI = {
         </div>
       </div>
       
+      <!-- EFFICIENCY SECTION -->
       <h2 class="section-title">Efficiency</h2>
       <div class="efficiency-panel">
         <div class="efficiency-item">
@@ -380,23 +443,24 @@ const KPI = {
         </div>
         <div class="efficiency-item">
           <div class="efficiency-label">On-time rate</div>
-          <div class="efficiency-value" style="color: ${completed === 0 ? 'var(--warning)' : 'var(--ink)'}">
+          <div class="efficiency-value" style="color: ${completed === 0 ? '#dc2626' : '#1e3a8a'}">
             ${completed === 0 ? '–' : onTimeRate + '%'}
           </div>
-          <div class="efficiency-note" style="color: ${completed === 0 ? 'var(--warning)' : 'var(--muted)'}">
+          <div class="efficiency-note" style="color: ${completed === 0 ? '#dc2626' : '#94a3b8'}">
             ${completed === 0 ? 'Needs completed trips' : 'of all trips'}
           </div>
         </div>
       </div>
       
+      <!-- FLEET SECTION -->
       <h2 class="section-title">Fleet</h2>
       <div class="fleet-panel">
         <div class="fleet-header">
           <div class="fleet-title">Total distance covered</div>
           <div class="fleet-util">Fleet utilization ${fleetUtilization}%</div>
         </div>
-        <div style="font-size: 36px; font-weight: 600; color: var(--ink); letter-spacing: -1px; margin-bottom: 16px;">
-          ${Utils.fmtNum(totalKm)} <span style="font-size: 16px; color: var(--muted); font-weight: 500;">km</span>
+        <div style="font-size: 36px; font-weight: 700; color: #1e3a8a; letter-spacing: -1px; margin-bottom: 16px;">
+          ${Utils.fmtNum(totalKm)} <span style="font-size: 16px; color: #64748b; font-weight: 500;">km</span>
         </div>
         <div class="fleet-bar" role="progressbar" aria-valuenow="${fleetUtilization}" aria-valuemin="0" aria-valuemax="100">
           ${trucks.map((t, i) => {
@@ -409,6 +473,7 @@ const KPI = {
         </div>
       </div>
       
+      <!-- CHARTS -->
       <div class="chart-grid">
         <div class="chart-box">
           <h3 class="chart-title">Monthly trips and revenue</h3>
@@ -453,8 +518,8 @@ const KPI = {
       data: {
         labels,
         datasets: [
-          { label: 'Trips', data: labels.map(m => months[m].trips), backgroundColor: '#1b44c8', yAxisID: 'y' },
-          { label: 'Revenue', data: labels.map(m => months[m].revenue), type: 'line', borderColor: '#1b44c8', backgroundColor: 'rgba(27, 68, 200, 0.1)', yAxisID: 'y1', tension: 0.4 }
+          { label: 'Trips', data: labels.map(m => months[m].trips), backgroundColor: '#1e40af', yAxisID: 'y' },
+          { label: 'Revenue', data: labels.map(m => months[m].revenue), type: 'line', borderColor: '#16a34a', backgroundColor: 'rgba(22, 163, 74, 0.1)', yAxisID: 'y1', tension: 0.4 }
         ]
       },
       options: {
@@ -491,7 +556,7 @@ const KPI = {
     if (!canvas) return;
 
     if (!data.length) {
-      canvas.parentElement.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 280px; color: var(--muted);">No fuel expenses recorded yet.</div>';
+      canvas.parentElement.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 280px; color: #64748b;">No fuel expenses recorded yet.</div>';
       return;
     }
 
@@ -501,7 +566,7 @@ const KPI = {
         labels: data.map(d => d.label),
         datasets: [{ 
           data: data.map(d => d.value), 
-          backgroundColor: ['#1b44c8', '#c9ccd3', '#5d6675', '#e0e3e8', '#94a3b8', '#64748b', '#475569'],
+          backgroundColor: ['#1e40af', '#f59e0b', '#16a34a', '#dc2626', '#8b5cf6', '#ec4899', '#06b6d4'],
           borderWidth: 0
         }]
       },
