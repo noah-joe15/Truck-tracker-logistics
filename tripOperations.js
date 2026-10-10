@@ -11,9 +11,6 @@ const TripOps = {
     const drivers = DB.drivers();
     const customers = DB.customers();
     const trips = DB.trips().sort((a, b) => new Date(b.date) - new Date(a.date));
-    
-    // Calculate totals for trip expenses safely (without reading DOM during render)
-    const totalExpenses = this.tripExpenses.reduce((sum, exp) => sum + Number(exp.amount || 0), 0);
 
     return `
       <div class="section-title">
@@ -143,7 +140,8 @@ const TripOps = {
             </div>
             <div class="form-group">
               <label>Truck</label>
-              <select id="tripTruck" class="input-field" onchange="TripOps.autoFillDriver()">
+              <!-- ADDED: syncExpenseTruck() to keep panels in sync -->
+              <select id="tripTruck" class="input-field" onchange="TripOps.autoFillDriver(); TripOps.syncExpenseTruck()">
                 <option value="">-- Select Truck --</option>
                 ${trucks.map(t => `<option value="${t.id}" data-driver="${t.driverId || ''}">${t.plateNumber}</option>`).join('')}
               </select>
@@ -222,7 +220,8 @@ const TripOps = {
           <div class="form-row">
             <div class="form-group">
               <label>Select Truck</label>
-              <select id="expTruck" class="input-field" onchange="TripOps.updateExpenseSummary()">
+              <!-- REMOVED: onchange refresh that was wiping the form -->
+              <select id="expTruck" class="input-field">
                 <option value="">-- Select Truck --</option>
                 ${trucks.map(t => `<option value="${t.id}">${t.plateNumber}</option>`).join('')}
               </select>
@@ -270,37 +269,8 @@ const TripOps = {
             <i class="fas fa-plus"></i> Add Expense
           </button>
 
-          <!-- Expense Summary -->
-          ${this.tripExpenses.length > 0 ? `
-            <div style="margin-top: 16px; padding: 12px; background: white; border-radius: 8px;">
-              <h3 style="margin: 0 0 12px 0; font-size: 14px; color: var(--primary-dark);">
-                <i class="fas fa-list"></i> Expenses for this Trip
-              </h3>
-              ${this.tripExpenses.map((exp, idx) => `
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid var(--border);">
-                  <div>
-                    <strong style="font-size: 13px;">${exp.type}</strong>
-                    ${exp.liters ? `<div style="font-size: 11px; color: var(--text-light);">${exp.liters} L</div>` : ''}
-                  </div>
-                  <div style="display: flex; align-items: center; gap: 10px;">
-                    <span style="font-weight: 700; color: var(--primary);">${Utils.fmtTZS(exp.amount)}</span>
-                    <button class="btn-danger" onclick="TripOps.removeTripExpense(${idx})" style="padding: 4px 8px; font-size: 11px;">
-                      <i class="fas fa-times"></i>
-                    </button>
-                  </div>
-                </div>
-              `).join('')}
-              <div style="margin-top: 12px; padding-top: 12px; border-top: 2px solid var(--primary);">
-                <div style="display: flex; justify-content: space-between;">
-                  <span style="font-weight: 600;">Total Trip Expenses:</span>
-                  <span style="font-weight: 800; color: var(--danger);">${Utils.fmtTZS(totalExpenses)}</span>
-                </div>
-                <p style="font-size: 11px; color: var(--text-light); margin: 8px 0 0 0; text-align: right;">
-                  <i class="fas fa-info-circle"></i> Deducted from trip revenue upon saving.
-                </p>
-              </div>
-            </div>
-          ` : ''}
+          <!-- Expense Summary Container (Updated dynamically without full page refresh) -->
+          <div id="tripExpensesSummaryContainer"></div>
         </div>
 
       </div>
@@ -325,6 +295,58 @@ const TripOps = {
 
   // ========== TRIP EXPENSE FUNCTIONS ==========
   
+  // NEW: Syncs the expense truck dropdown to match the trip truck dropdown
+  syncExpenseTruck() {
+    const tripTruckId = document.getElementById('tripTruck')?.value;
+    const expTruckSelect = document.getElementById('expTruck');
+    if (expTruckSelect && tripTruckId) {
+      expTruckSelect.value = tripTruckId;
+    }
+  },
+
+  // NEW: Renders only the expense list without wiping the rest of the form
+  renderExpenseSummary() {
+    const totalExpenses = this.tripExpenses.reduce((sum, exp) => sum + Number(exp.amount || 0), 0);
+    const container = document.getElementById('tripExpensesSummaryContainer');
+    if (!container) return;
+
+    if (this.tripExpenses.length === 0) {
+      container.innerHTML = '';
+      return;
+    }
+
+    container.innerHTML = `
+      <div style="margin-top: 16px; padding: 12px; background: white; border-radius: 8px;">
+        <h3 style="margin: 0 0 12px 0; font-size: 14px; color: var(--primary-dark);">
+          <i class="fas fa-list"></i> Expenses for this Trip
+        </h3>
+        ${this.tripExpenses.map((exp, idx) => `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid var(--border);">
+            <div>
+              <strong style="font-size: 13px;">${exp.type}</strong>
+              ${exp.liters ? `<div style="font-size: 11px; color: var(--text-light);">${exp.liters} L</div>` : ''}
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-weight: 700; color: var(--primary);">${Utils.fmtTZS(exp.amount)}</span>
+              <button class="btn-danger" onclick="TripOps.removeTripExpense(${idx})" style="padding: 4px 8px; font-size: 11px;">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        `).join('')}
+        <div style="margin-top: 12px; padding-top: 12px; border-top: 2px solid var(--primary);">
+          <div style="display: flex; justify-content: space-between;">
+            <span style="font-weight: 600;">Total Trip Expenses:</span>
+            <span style="font-weight: 800; color: var(--danger);">${Utils.fmtTZS(totalExpenses)}</span>
+          </div>
+          <p style="font-size: 11px; color: var(--text-light); margin: 8px 0 0 0; text-align: right;">
+            <i class="fas fa-info-circle"></i> Deducted from trip revenue upon saving.
+          </p>
+        </div>
+      </div>
+    `;
+  },
+
   handleExpenseTypeChange() {
     const type = document.getElementById('expType').value;
     const fuelFields = document.getElementById('fuelFields');
@@ -398,16 +420,15 @@ const TripOps = {
     this.tripExpenses.push(expense);
     document.getElementById('expType').value = '';
     this.handleExpenseTypeChange();
-    App.refresh();
+    
+    // Update DOM directly instead of App.refresh() to preserve form inputs
+    this.renderExpenseSummary();
   },
 
   removeTripExpense(index) {
     this.tripExpenses.splice(index, 1);
-    App.refresh();
-  },
-
-  updateExpenseSummary() {
-    App.refresh();
+    // Update DOM directly instead of App.refresh()
+    this.renderExpenseSummary();
   },
 
   // ========== EXISTING FUNCTIONS ==========
@@ -600,11 +621,10 @@ const TripOps = {
     const driverId = document.getElementById('tripDriver').value;
     const customerId = document.getElementById('tripCustomer').value;
 
-    // Generate a guaranteed unique ID for the trip
     const tripId = 'trip_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
 
     const trip = {
-      id: tripId, // Explicitly set ID
+      id: tripId,
       date: document.getElementById('tripDate').value,
       truckId: truckId,
       driverId: driverId,
@@ -630,7 +650,6 @@ const TripOps = {
       logActivity({ module: 'trips', action: 'create', description: `Trip ${trip.from} to ${trip.to}`, ref: trip.truckId, user: 'admin' });
     }
 
-    // Save trip expenses if any
     if (this.tripExpenses.length > 0) {
       this.tripExpenses.forEach(exp => {
         DB.push('expenses', {
@@ -642,7 +661,7 @@ const TripOps = {
           liters: exp.liters,
           method: 'Cash',
           description: `Trip expense: ${exp.type} for ${trip.from} to ${trip.to}`,
-          tripId: trip.id // Now guaranteed to exist!
+          tripId: trip.id
         });
       });
       
@@ -656,7 +675,6 @@ const TripOps = {
         });
       }
       
-      // Clear trip expenses after saving
       this.tripExpenses = [];
     }
 
@@ -692,5 +710,11 @@ const TripOps = {
       }
       App.refresh();
     }
+  },
+
+  // NEW: Called after render to sync UI state
+  afterRender() {
+    this.syncExpenseTruck();
+    this.renderExpenseSummary();
   }
 };
