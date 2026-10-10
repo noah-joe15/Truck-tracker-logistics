@@ -1,4 +1,6 @@
 const KPI = {
+  showOnTimeDetails: false, // State to toggle the detailed view
+
   render() {
     const trucks = DB.trucks(), trips = DB.trips();
     const expenses = DB.expenses(), income = DB.income();
@@ -27,7 +29,6 @@ const KPI = {
     const completed = trips.filter(t => t.status === 'Completed').length;
     const onTimeRate = completed > 0 ? ((onTime / completed) * 100).toFixed(0) : 0;
     
-    // Fixed calculations
     const runningCosts = totalRev > 0 ? totalRev - (totalRev - totalExp) : totalExp;
     const costPer100km = totalKm > 0 ? Math.round((runningCosts / totalKm) * 100) : 0;
     const netProfit = totalRev - totalExp;
@@ -41,6 +42,102 @@ const KPI = {
       day: 'numeric' 
     });
 
+    // If showing details, render the completed trips list
+    if (this.showOnTimeDetails) {
+      const completedTrips = trips
+        .filter(t => t.status === 'Completed')
+        .sort((a, b) => new Date(b.completedAt || b.date) - new Date(a.completedAt || a.date));
+
+      return `
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
+          * { font-family: 'Hanken Grotesk', system-ui, -apple-system, sans-serif; font-variant-numeric: tabular-nums; }
+          
+          .kpi-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #e0e3e8; }
+          .kpi-header h1 { font-size: 20px; font-weight: 600; color: #1e3a8a; margin: 0; letter-spacing: -0.3px; }
+          .kpi-date { font-size: 13px; color: #64748b; font-weight: 500; }
+          
+          .btn-back {
+            background: #f1f5f9; color: #1e3a8a; border: 1px solid #e0e3e8; border-radius: 8px;
+            padding: 10px 20px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+            display: inline-flex; align-items: center; gap: 8px;
+          }
+          .btn-back:hover { background: #e2e8f0; }
+
+          .details-panel {
+            background: #ffffff; border: 1px solid #e0e3e8; border-radius: 10px; overflow: hidden;
+          }
+          .details-header {
+            padding: 20px; border-bottom: 1px solid #e0e3e8; display: flex; justify-content: space-between; align-items: center;
+          }
+          .details-title { font-size: 16px; font-weight: 600; color: #1e3a8a; margin: 0; }
+          
+          .trip-detail-row {
+            display: grid; grid-template-columns: 1.5fr 2fr 1fr 1fr; gap: 16px;
+            padding: 16px 20px; border-bottom: 1px solid #f1f5f9; align-items: center;
+          }
+          .trip-detail-row:last-child { border-bottom: none; }
+          .trip-detail-row:hover { background: #f8fafc; }
+          
+          .detail-truck { font-weight: 600; color: #0f172a; font-size: 14px; }
+          .detail-route { font-size: 13px; color: #64748b; margin-top: 2px; }
+          .detail-date { font-size: 13px; color: #64748b; }
+          .detail-status { 
+            font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: 6px; 
+            display: inline-block; text-align: center; width: fit-content;
+          }
+          .detail-status.ontime { background: #f0fdf4; color: #16a34a; }
+          .detail-status.late { background: #fef2f2; color: #dc2626; }
+          
+          .empty-details { padding: 40px; text-align: center; color: #64748b; font-size: 14px; }
+
+          @media (max-width: 820px) {
+            .trip-detail-row { grid-template-columns: 1fr 1fr; gap: 12px; }
+            .trip-detail-row > :nth-child(2) { grid-column: span 2; }
+          }
+        </style>
+
+        <div class="kpi-header">
+          <h1>Operations KPIs</h1>
+          <div class="kpi-date">${today}</div>
+        </div>
+
+        <div class="details-panel">
+          <div class="details-header">
+            <h2 class="details-title">Completed Trips Details</h2>
+            <button class="btn-back" onclick="KPI.toggleOnTimeDetails()">
+              ← Back to Efficiency
+            </button>
+          </div>
+          
+          ${completedTrips.length > 0 ? completedTrips.map(trip => {
+            const truck = trucks.find(t => t.id === trip.truckId);
+            const isOnTime = trip.onTime;
+            return `
+              <div class="trip-detail-row">
+                <div>
+                  <div class="detail-truck">${truck ? Utils.esc(truck.plateNumber) : 'Unknown Truck'}</div>
+                  <div class="detail-route">${Utils.esc(trip.from)} → ${Utils.esc(trip.to)}</div>
+                </div>
+                <div class="detail-date">
+                  Completed: ${Utils.fmtDate(trip.completedAt || trip.date)}
+                </div>
+                <div class="detail-date">
+                  Distance: ${Utils.fmtNum(trip.distance)} km
+                </div>
+                <div>
+                  <span class="detail-status ${isOnTime ? 'ontime' : 'late'}">
+                    ${isOnTime ? 'On Time' : 'Late'}
+                  </span>
+                </div>
+              </div>
+            `;
+          }).join('') : '<div class="empty-details">No completed trips recorded yet.</div>'}
+        </div>
+      `;
+    }
+
+    // Normal KPI View
     return `
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
@@ -264,6 +361,16 @@ const KPI = {
           font-size: 12px;
           color: #94a3b8;
         }
+
+        .clickable-card {
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        .clickable-card:hover {
+          background: #f8fafc;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
         
         .fleet-panel {
           background: #ffffff;
@@ -334,34 +441,13 @@ const KPI = {
         }
         
         @media (max-width: 820px) {
-          .hero-panel {
-            grid-template-columns: 1fr;
-          }
-          
-          .hero-left {
-            border-right: none;
-            border-bottom: 1px solid #e0e3e8;
-          }
-          
-          .efficiency-panel {
-            grid-template-columns: repeat(2, 1fr);
-          }
-          
-          .efficiency-item:nth-child(2) {
-            border-right: none;
-          }
-          
-          .efficiency-item:nth-child(2n) {
-            border-right: none;
-          }
-          
-          .chart-grid {
-            grid-template-columns: 1fr;
-          }
-          
-          .kpi-grid {
-            grid-template-columns: repeat(2, 1fr);
-          }
+          .hero-panel { grid-template-columns: 1fr; }
+          .hero-left { border-right: none; border-bottom: 1px solid #e0e3e8; }
+          .efficiency-panel { grid-template-columns: repeat(2, 1fr); }
+          .efficiency-item:nth-child(2) { border-right: none; }
+          .efficiency-item:nth-child(2n) { border-right: none; }
+          .chart-grid { grid-template-columns: 1fr; }
+          .kpi-grid { grid-template-columns: repeat(2, 1fr); }
         }
       </style>
       
@@ -370,7 +456,6 @@ const KPI = {
         <div class="kpi-date">${today}</div>
       </div>
       
-      <!-- TOP KPI CARDS -->
       <div class="kpi-grid">
         <div class="kpi-card">
           <div class="kpi-label">Total Revenue</div>
@@ -394,7 +479,6 @@ const KPI = {
         </div>
       </div>
       
-      <!-- HERO PANEL: Profit Breakdown -->
       <div class="hero-panel">
         <div class="hero-left">
           <div class="hero-label">Net profit</div>
@@ -423,7 +507,6 @@ const KPI = {
         </div>
       </div>
       
-      <!-- EFFICIENCY SECTION -->
       <h2 class="section-title">Efficiency</h2>
       <div class="efficiency-panel">
         <div class="efficiency-item">
@@ -441,18 +524,18 @@ const KPI = {
           <div class="efficiency-value">${completed}</div>
           <div class="efficiency-note">this period</div>
         </div>
-        <div class="efficiency-item">
+        <div class="efficiency-item clickable-card" onclick="KPI.toggleOnTimeDetails()" title="Click to view completed trips">
           <div class="efficiency-label">On-time rate</div>
-          <div class="efficiency-value" style="color: ${completed === 0 ? '#dc2626' : '#1e3a8a'}">
+          <div class="efficiency-value" style="color: ${completed === 0 ? '#dc2626' : '#1e3a8a'}; display: flex; align-items: center; gap: 8px;">
             ${completed === 0 ? '–' : onTimeRate + '%'}
+            <svg style="width: 16px; height: 16px; opacity: 0.5;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
           </div>
           <div class="efficiency-note" style="color: ${completed === 0 ? '#dc2626' : '#94a3b8'}">
-            ${completed === 0 ? 'Needs completed trips' : 'of all trips'}
+            ${completed === 0 ? 'Needs completed trips' : 'Tap to view details'}
           </div>
         </div>
       </div>
       
-      <!-- FLEET SECTION -->
       <h2 class="section-title">Fleet</h2>
       <div class="fleet-panel">
         <div class="fleet-header">
@@ -473,7 +556,6 @@ const KPI = {
         </div>
       </div>
       
-      <!-- CHARTS -->
       <div class="chart-grid">
         <div class="chart-box">
           <h3 class="chart-title">Monthly trips and revenue</h3>
@@ -491,9 +573,16 @@ const KPI = {
     `;
   },
 
+  toggleOnTimeDetails() {
+    this.showOnTimeDetails = !this.showOnTimeDetails;
+    App.refresh();
+  },
+
   afterRender() {
-    this.renderMonthlyChart();
-    this.renderFuelChart();
+    if (!this.showOnTimeDetails) {
+      this.renderMonthlyChart();
+      this.renderFuelChart();
+    }
   },
 
   renderMonthlyChart() {
