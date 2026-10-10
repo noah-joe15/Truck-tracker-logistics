@@ -71,6 +71,23 @@ const Dashboard = {
         .btn-primary:hover {
           background: #1e3a8a;
         }
+
+        .btn-end-trip {
+          background: #16a34a;
+          color: #ffffff;
+          border: none;
+          border-radius: 6px;
+          padding: 8px 14px;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: background-color 0.2s;
+          width: 100%;
+        }
+        
+        .btn-end-trip:hover {
+          background: #15803d;
+        }
         
         .dashboard-grid {
           display: grid;
@@ -166,12 +183,6 @@ const Dashboard = {
           font-size: 12px;
           color: #64748b;
           text-align: right;
-        }
-        
-        .arrival-time {
-          font-size: 13px;
-          color: #0f172a;
-          font-weight: 500;
         }
         
         .activity-item {
@@ -312,7 +323,11 @@ const Dashboard = {
                     </div>
                     <div class="progress-text">${progress}%</div>
                   </div>
-                  <div class="arrival-time">Today</div>
+                  <div style="text-align: right;">
+                    <button class="btn-end-trip" onclick="Dashboard.endTrip('${trip.id}')">
+                      End Trip
+                    </button>
+                  </div>
                 </div>
               `;
             }).join('') : '<div class="empty-state">No trips in progress. Start one with New trip.</div>'}
@@ -435,5 +450,31 @@ const Dashboard = {
         </div>
       </div>
     `).join('');
+  },
+
+  // NEW: Smart End Trip Function
+  endTrip(tripId) {
+    const isOnTime = confirm('Was this trip completed on time?\n\nClick OK for Yes, Cancel for No.');
+    
+    // Update the trip in the database
+    DB.update('trips', tripId, { 
+      status: 'Completed', 
+      onTime: isOnTime,
+      completedAt: new Date().toISOString() // Smart timestamp tracking
+    });
+    
+    const trip = DB.trips().find(t => t.id === tripId);
+    if (typeof logActivity === 'function') {
+      logActivity({ 
+        module: 'trips', 
+        action: 'update', 
+        description: `Ended trip ${trip ? trip.from + ' to ' + trip.to : tripId} (${isOnTime ? 'On Time' : 'Late'})`, 
+        ref: tripId, 
+        user: 'admin' 
+      });
+    }
+    
+    alert('Trip marked as completed successfully!');
+    App.refresh();
   }
 };
