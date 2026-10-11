@@ -11,6 +11,99 @@ const History = {
     const total = ActivityLog.all().length;
 
     return `
+      <style>
+        .history-table-container {
+          max-height: 600px;
+          overflow-y: auto;
+          border: 1px solid var(--border);
+          border-radius: 8px;
+        }
+        
+        .history-table {
+          width: 100%;
+          border-collapse: separate;
+          border-spacing: 0;
+        }
+        
+        .history-table thead th {
+          position: sticky;
+          top: 0;
+          background: #1e3a8a;
+          color: white;
+          z-index: 10;
+          padding: 12px 16px;
+          text-align: left;
+          font-weight: 600;
+          font-size: 13px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        
+        .history-table tbody tr {
+          border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .history-table tbody tr:hover {
+          background: #f8fafc;
+        }
+        
+        .history-table td {
+          padding: 12px 16px;
+          font-size: 13px;
+          color: #0f172a;
+        }
+        
+        .module-pill {
+          display: inline-block;
+          padding: 4px 10px;
+          border-radius: 6px;
+          background: #f1f5f9;
+          font-size: 12px;
+          font-weight: 500;
+          color: #64748b;
+        }
+        
+        .action-pill {
+          display: inline-block;
+          padding: 4px 10px;
+          border-radius: 6px;
+          font-size: 12px;
+          font-weight: 600;
+          text-transform: uppercase;
+        }
+        
+        .action-pill.create { background: #f0fdf4; color: #16a34a; }
+        .action-pill.update { background: #eff6ff; color: #1e40af; }
+        .action-pill.delete { background: #fef2f2; color: #dc2626; }
+        .action-pill.login { background: #f5f3ff; color: #7c3aed; }
+        .action-pill.export { background: #fffbeb; color: #d97706; }
+        
+        .time-cell {
+          font-family: 'Courier New', monospace;
+          font-size: 12px;
+          color: #64748b;
+        }
+        
+        /* Custom scrollbar for webkit browsers */
+        .history-table-container::-webkit-scrollbar {
+          width: 8px;
+        }
+        
+        .history-table-container::-webkit-scrollbar-track {
+          background: #f1f5f9;
+          border-radius: 4px;
+        }
+        
+        .history-table-container::-webkit-scrollbar-thumb {
+          background: #cbd5e1;
+          border-radius: 4px;
+        }
+        
+        .history-table-container::-webkit-scrollbar-thumb:hover {
+          background: #94a3b8;
+        }
+      </style>
+      
       <div class="section-title">
         <h2><svg style="width:24px;height:24px"><use href="#i-clock"/></svg> System Activity History</h2>
       </div>
@@ -71,9 +164,9 @@ const History = {
         </div>
       </div>
 
-      <!-- Activity Log Table -->
+      <!-- Activity Log Table with Independent Scroll -->
       <div class="history-table-wrap">
-        <div style="padding:14px 16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; border-bottom:1px solid var(--border);">
+        <div style="padding:14px 16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; border-bottom:1px solid var(--border); background: white;">
           <h3 style="margin:0; font-size:15px; font-weight:700; color:var(--primary-dark); display:flex; align-items:center; gap:8px;">
             <svg style="width:18px;height:18px;color:var(--primary)"><use href="#i-table"/></svg>
             Activity Log <span style="color:var(--text-light); font-weight:500; font-size:13px;">(${entries.length} of ${total} entries)</span>
@@ -86,12 +179,16 @@ const History = {
             <p>No activities match your filters.</p>
           </div>
         ` : `
-          <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
+          <div class="history-table-container">
             <table class="history-table">
               <thead>
                 <tr>
-                  <th>Time</th><th>Module</th><th>Action</th>
-                  <th>Description</th><th>Reference</th><th>User</th>
+                  <th style="min-width: 150px;">Time</th>
+                  <th style="min-width: 120px;">Module</th>
+                  <th style="min-width: 100px;">Action</th>
+                  <th>Description</th>
+                  <th style="min-width: 150px;">Reference</th>
+                  <th style="min-width: 100px;">User</th>
                 </tr>
               </thead>
               <tbody>
@@ -99,7 +196,7 @@ const History = {
               </tbody>
             </table>
           </div>
-          <div class="pagination">
+          <div class="pagination" style="margin-top: 16px;">
             <div>Page ${this.page} of ${Math.max(1, Math.ceil(entries.length / this.PAGE_SIZE))}</div>
             <div class="pagination-btns">
               <button onclick="History.goPage(1)" ${this.page===1?'disabled':''}>First</button>
@@ -192,6 +289,11 @@ const History = {
     const entries = this.getFiltered();
     const max = Math.max(1, Math.ceil(entries.length / this.PAGE_SIZE));
     this.page = Math.max(1, Math.min(p, max));
+    // Scroll to top of table when changing pages
+    const tableContainer = document.querySelector('.history-table-container');
+    if (tableContainer) {
+      tableContainer.scrollTop = 0;
+    }
     App.refresh();
   },
 
