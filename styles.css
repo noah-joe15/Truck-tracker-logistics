@@ -1190,3 +1190,39 @@ img, svg, canvas, video {
   0% { opacity: 1; transform: scale(1); }
   100% { opacity: 0; transform: scale(0.95); }
 }
+
+/* =========================================
+   GLASSMORPHISM EFFECT FOR KPI HERO PANEL
+   ========================================= */
+
+/* 1. Colorful Background to make the Glass effect pop */
+body {
+  background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 50%, #f8fafc 100%) !important;
+  background-attachment: fixed;
+}
+
+/* 2. Glassmorphism effect for the Hero Panel */
+.hero-panel {
+  background: rgba(255, 255, 255, 0.45) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05) !important;
+  border-radius: 16px !important;
+}
+
+/* 3. Make the left side divider subtle for glass effect */
+.hero-left {
+  border-right: 1px solid rgba(255, 255, 255, 0.5) !important;
+}
+
+/* 4. Make the revenue bar look like a frosted glass track */
+.revenue-bar {
+  background: rgba(224, 227, 232, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* 5. Make the total revenue divider line subtle */
+.legend-row.total {
+  border-top: 1px solid rgba(224, 227, 232, 0.5) !important;
+}
