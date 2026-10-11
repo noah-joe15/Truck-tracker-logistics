@@ -1,3 +1,4 @@
+
 const KPI = {
   showOnTimeDetails: false, // State to toggle the detailed view
 
@@ -608,67 +609,73 @@ const runningCostsMargin = totalRev > 0 ? ((runningCosts / totalRev) * 100).toFi
       data: {
         labels,
         datasets: [
-          { 
-            label: 'Trips', 
-            data: labels.map(m => months[m].trips), 
-            backgroundColor: '#1e40af', 
-            yAxisID: 'y',
-            order: 2 // Render this second (behind)
-          },
-          { 
-            label: 'Revenue', 
-            data: labels.map(m => months[m].revenue), 
-            type: 'line', 
-            borderColor: '#16a34a', 
-            backgroundColor: 'rgba(22, 163, 74, 0.2)', 
-            yAxisID: 'y1', 
-            tension: 0.4,
-            borderWidth: 3, // Make line thicker
-            pointBackgroundColor: '#16a34a',
-            pointRadius: 5,
-            pointHoverRadius: 7,
-            order: 1 // Render this first (on top)
-          }
+          { label: 'Trips', data: labels.map(m => months[m].trips), backgroundColor: '#1e40af', yAxisID: 'y' },
+          { label: 'Revenue', data: labels.map(m => months[m].revenue), type: 'line', borderColor: '#16a34a', backgroundColor: 'rgba(22, 163, 74, 0.1)', yAxisID: 'y1', tension: 0.4 }
         ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: { 
-          legend: { 
-            position: 'bottom', 
-            labels: { 
-              usePointStyle: true, 
-              boxWidth: 12,
-              padding: 15,
-              font: { size: 12 }
-            } 
-          },
-          tooltip: {
-            mode: 'index',
-            intersect: false
-          }
+          legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8 } }
         },
         scales: {
-          y:  { 
-            position: 'left', 
-            title: { display: true, text: 'Trips', font: { size: 12 } }, 
-            grid: { color: 'rgba(0,0,0,0.05)' }, 
-            beginAtZero: true,
-            ticks: { stepSize: 1 } // Ensure whole numbers for trips
-          },
-          y1: { 
-            position: 'right', 
-            title: { display: true, text: 'TZS', font: { size: 12 } }, 
-            grid: { drawOnChartArea: false, color: 'rgba(0,0,0,0.05)' }, 
-            beginAtZero: true,
-            ticks: {
-              callback: function(value) {
-                return Utils.fmtTZS(value).replace(' TZS', '');
+          y:  { position: 'left', title: { display: true, text: 'Trips' }, grid: { color: 'rgba(0,0,0,0.05)' }, beginAtZero: true },
+          y1: { position: 'right', title: { display: true, text: 'TZS' }, grid: { drawOnChartArea: false, color: 'rgba(0,0,0,0.05)' }, beginAtZero: true }
+        }
+      }
+    });
+  },
+
+  renderFuelChart() {
+    const trucks = DB.trucks(), expenses = DB.expenses();
+    
+    const data = trucks.map(t => {
+      const truckFuelExpenses = expenses.filter(e => 
+        e.truckId === t.id && (e.category === 'Fuel (Diesel/Petrol)' || e.category === 'Fuel')
+      );
+      
+      const totalCost = truckFuelExpenses.reduce((s, x) => s + Number(x.amount || 0), 0);
+      
+      return {
+        label: t.plateNumber,
+        value: totalCost
+      };
+    }).filter(d => d.value > 0);
+    
+    const canvas = document.getElementById('kpiFuelChart');
+    if (!canvas) return;
+
+    if (!data.length) {
+      canvas.parentElement.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 280px; color: #64748b;">No fuel expenses recorded yet.</div>';
+      return;
+    }
+
+    new Chart(canvas, {
+      type: 'doughnut',
+      data: {
+        labels: data.map(d => d.label),
+        datasets: [{ 
+          data: data.map(d => d.value), 
+          backgroundColor: ['#1e40af', '#f59e0b', '#16a34a', '#dc2626', '#8b5cf6', '#ec4899', '#06b6d4'],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '65%',
+        plugins: { 
+          legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 12, padding: 15 } },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return context.label + ': ' + Utils.fmtTZS(context.parsed);
               }
             }
           }
         }
       }
     });
-  },
+  }
+};
