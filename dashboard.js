@@ -185,12 +185,50 @@ const Dashboard = {
           text-align: right;
         }
         
+        /* Scrollable activity container */
+        .activity-container {
+          max-height: 300px;
+          overflow-y: auto;
+          position: relative;
+          padding-right: 8px;
+        }
+        
+        .activity-container::-webkit-scrollbar {
+          width: 6px;
+        }
+        
+        .activity-container::-webkit-scrollbar-track {
+          background: #f1f5f9;
+          border-radius: 3px;
+        }
+        
+        .activity-container::-webkit-scrollbar-thumb {
+          background: #cbd5e1;
+          border-radius: 3px;
+        }
+        
+        .activity-container::-webkit-scrollbar-thumb:hover {
+          background: #94a3b8;
+        }
+        
         .activity-item {
           padding: 12px 0;
           border-bottom: 1px solid #f1f5f9;
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
+          animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
         
         .activity-item:last-child {
@@ -214,6 +252,22 @@ const Dashboard = {
           color: #94a3b8;
           white-space: nowrap;
           margin-left: 12px;
+        }
+        
+        /* Fade effect at bottom */
+        .activity-fade {
+          position: sticky;
+          bottom: 0;
+          height: 40px;
+          background: linear-gradient(to bottom, transparent, #ffffff);
+          pointer-events: none;
+          margin-top: -40px;
+          opacity: 0;
+          transition: opacity 0.3s;
+        }
+        
+        .activity-container.has-scroll .activity-fade {
+          opacity: 1;
         }
         
         .fleet-item {
@@ -368,6 +422,29 @@ const Dashboard = {
           </div>
         </div>
       </div>
+      
+      <script>
+        // Add scroll detection for fade effect
+        setTimeout(() => {
+          const container = document.querySelector('.activity-container');
+          const fadeEffect = document.querySelector('.activity-fade');
+          if (container && fadeEffect) {
+            container.addEventListener('scroll', () => {
+              const isScrollable = container.scrollHeight > container.clientHeight;
+              const isAtBottom = container.scrollTop + container.clientHeight >= container.scrollHeight - 5;
+              
+              if (isScrollable && !isAtBottom) {
+                container.classList.add('has-scroll');
+              } else {
+                container.classList.remove('has-scroll');
+              }
+            });
+            
+            // Trigger initial check
+            container.dispatchEvent(new Event('scroll'));
+          }
+        }, 100);
+      </script>
     `;
   },
 
@@ -392,37 +469,49 @@ const Dashboard = {
   getRecentActivity(trips, expenses) {
     const activities = [];
     
-    trips.slice(0, 3).forEach(trip => {
+    // Get recent trips (last 10)
+    trips.slice(0, 10).forEach(trip => {
       activities.push({
         title: 'Trip departed',
         detail: `${trip.from} to ${trip.to}`,
-        time: Utils.fmtDate(trip.date)
+        time: Utils.fmtDate(trip.date),
+        timestamp: new Date(trip.date).getTime()
       });
     });
     
-    expenses.slice(0, 2).forEach(exp => {
+    // Get recent fuel expenses (last 5)
+    expenses.slice(0, 5).forEach(exp => {
       if (exp.category === 'Fuel (Diesel/Petrol)' || exp.category === 'Fuel') {
         activities.push({
           title: 'Fuel purchase recorded',
           detail: Utils.fmtTZS(exp.amount),
-          time: Utils.fmtDate(exp.date)
+          time: Utils.fmtDate(exp.date),
+          timestamp: new Date(exp.date).getTime()
         });
       }
     });
+    
+    // Sort by most recent
+    activities.sort((a, b) => b.timestamp - a.timestamp);
     
     if (activities.length === 0) {
       return '<div class="empty-state">No recent activity recorded yet.</div>';
     }
     
-    return activities.map(a => `
-      <div class="activity-item">
-        <div>
-          <div class="activity-title">${a.title}</div>
-          <div class="activity-detail">${a.detail}</div>
-        </div>
-        <div class="activity-time">${a.time}</div>
+    return `
+      <div class="activity-container">
+        ${activities.map(a => `
+          <div class="activity-item">
+            <div>
+              <div class="activity-title">${a.title}</div>
+              <div class="activity-detail">${a.detail}</div>
+            </div>
+            <div class="activity-time">${a.time}</div>
+          </div>
+        `).join('')}
+        <div class="activity-fade"></div>
       </div>
-    `).join('');
+    `;
   },
 
   getNeedsAttention(trucks, trips) {
