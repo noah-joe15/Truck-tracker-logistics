@@ -10,8 +10,8 @@ const KPI = {
     const totalRev = income.reduce((s, x) => s + Number(x.amount || 0), 0);
     const totalExp = expenses.reduce((s, x) => s + Number(x.amount || 0), 0);
     const tripExpenses = expenses
-      .filter(e => e.tripId || ['Fuel', 'Driver Allowance', 'Turnboy Allowance'].includes(e.category))
-      .reduce((s, x) => s + Number(x.amount || 0), 0);
+  .filter(e => e.tripId && ['Fuel', 'Driver Allowance', 'Turnboy Allowance'].includes(e.category))
+  .reduce((s, x) => s + Number(x.amount || 0), 0);
     const totalKm  = trips.reduce((s, x) => s + Number(x.distance || 0), 0);
     
     const DIESEL_PRICE = 3430;
