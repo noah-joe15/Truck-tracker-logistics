@@ -1,4 +1,3 @@
-
 const KPI = {
   showOnTimeDetails: false, // State to toggle the detailed view
 
@@ -12,11 +11,12 @@ const KPI = {
    const tripExpenses = expenses
   .filter(e => {
     const hasTripId = e.tripId && e.tripId !== '';
-    const isTripExpense = ['Fuel', 'Fuel (Diesel/Petrol)', 'Driver Allowance', 'Driver Allowance / Per Diem', 'Turnboy Allowance'].includes(e.category);
-    return hasTripId && isTripExpense;
+    const isFuelExpense = e.category && e.category.includes('Fuel');
+    const isDriverAllowance = e.category === 'Driver Allowance' || e.category === 'Driver Allowance / Per Diem';
+    const isTurnboyAllowance = e.category === 'Turnboy Allowance';
+    return hasTripId && (isFuelExpense || isDriverAllowance || isTurnboyAllowance);
   })
   .reduce((s, x) => s + Number(x.amount || 0), 0);
-    const totalKm  = trips.reduce((s, x) => s + Number(x.distance || 0), 0);
     
     const DIESEL_PRICE = 3430;
     const fuelExpenses = expenses.filter(e => 
@@ -34,13 +34,13 @@ const KPI = {
     const completed = trips.filter(t => t.status === 'Completed').length;
     const onTimeRate = completed > 0 ? ((onTime / completed) * 100).toFixed(0) : 0;
     
-    const runningCosts = totalRev > 0 ? totalRev - (totalRev - totalExp) : totalExp;
+    // Running costs = ALL expenses (Trip expenses + Maintenance + Spare parts + Fines, etc.)
+    const runningCosts = totalExp;
+    const runningCostsMargin = totalRev > 0 ? ((runningCosts / totalRev) * 100).toFixed(1) : '0.0';
     const costPer100km = totalKm > 0 ? Math.round((runningCosts / totalKm) * 100) : 0;
     const netProfit = totalRev - totalExp;
     const profitMargin = totalRev > 0 ? ((netProfit / totalRev) * 100).toFixed(1) : '0.0';
-const runningCostsMargin = totalRev > 0 ? ((runningCosts / totalRev) * 100).toFixed(1) : '0.0';
     const fleetUtilization = trucks.length > 0 ? Math.round((inTransit / trucks.length) * 100) : 0;
-
     const today = new Date().toLocaleDateString('en-GB', { 
       weekday: 'long', 
       year: 'numeric', 
