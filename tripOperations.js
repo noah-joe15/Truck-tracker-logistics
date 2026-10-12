@@ -614,14 +614,12 @@ const TripOps = {
     const driverId = document.getElementById('tripDriver').value;
     const customerId = document.getElementById('tripCustomer').value;
 
-    // 1. Existing Validations
     if (!truckId) return alert('Please select a truck.');
     if (!driverId) return alert('Please select a driver from the dropdown.');
     if (!document.getElementById('tripFrom').value || !document.getElementById('tripTo').value) {
       return alert('Please select both Origin and Destination regions.');
     }
 
-    // 2. NEW: Check if the truck is already on an active trip
     const activeTrip = DB.trips().find(t => t.truckId === truckId && t.status === 'In Transit');
     if (activeTrip) {
       const truck = DB.trucks().find(t => t.id === truckId);
@@ -629,7 +627,6 @@ const TripOps = {
       return alert(`This truck (${plate}) is already on an active trip to ${activeTrip.to}.\n\nPlease end the current trip before assigning a new one.`);
     }
 
-    // 3. Proceed with saving if validation passes
     const tripId = 'trip_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
 
     const trip = {
@@ -650,15 +647,21 @@ const TripOps = {
     };
 
     DB.push('trips', trip);
+    console.log('Trip saved:', trip);
     
     if (typeof logActivity === 'function') {
       logActivity({ module: 'trips', action: 'create', description: `Trip ${trip.from} to ${trip.to}`, ref: trip.truckId, user: 'admin' });
     }
 
-    // 4. Save trip expenses if any
+    // DEBUG: Check if there are expenses to save
+    console.log('Trip expenses to save:', this.tripExpenses);
+    console.log('Number of expenses:', this.tripExpenses.length);
+
     if (this.tripExpenses.length > 0) {
-      this.tripExpenses.forEach(exp => {
-        DB.push('expenses', {
+      this.tripExpenses.forEach((exp, index) => {
+        console.log(`Saving expense ${index + 1}:`, exp);
+        
+        const expenseRecord = {
           date: trip.date,
           truckId: exp.truckId,
           driverId: trip.driverId,
@@ -668,7 +671,11 @@ const TripOps = {
           method: 'Cash',
           description: `Trip expense: ${exp.type} for ${trip.from} to ${trip.to}`,
           tripId: trip.id
-        });
+        };
+        
+        console.log('Expense record to save:', expenseRecord);
+        DB.push('expenses', expenseRecord);
+        console.log('Expense saved to database');
       });
       
       if (typeof logActivity === 'function') {
@@ -682,9 +689,11 @@ const TripOps = {
       }
       
       this.tripExpenses = [];
+      console.log('Trip expenses cleared');
+    } else {
+      console.log('No trip expenses to save');
     }
 
-    // 5. Record Income
     if (paidAmount > 0) {
       DB.push('income', {
         date: trip.date, truckId: trip.truckId, driverId: trip.driverId,
@@ -693,7 +702,6 @@ const TripOps = {
       });
     }
 
-    // 6. Record Debt if applicable
     if (balance > 0 && customerId) {
       DB.push('debts', {
         date: trip.date,
@@ -708,8 +716,7 @@ const TripOps = {
 
     alert('Trip saved successfully! Income, Expenses, and/or Debt records updated automatically.');
     App.refresh();
-  }, // <-- FIXED: Added missing comma here
-
+  },
   deleteTrip(id) {
     if (confirm('Delete this trip? Note: This will NOT automatically reverse associated income, expense, or debt records.')) {
       DB.remove('trips', id);
