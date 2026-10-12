@@ -612,7 +612,7 @@ const TripOps = {
     }
   },
 
-  saveTrip() {
+   saveTrip() {
     const totalPrice = Number(document.getElementById('tripTotalPrice').value) || 0;
     const paidAmount = Number(document.getElementById('tripPaidAmount').value) || 0;
     const balance = totalPrice - paidAmount;
@@ -621,6 +621,22 @@ const TripOps = {
     const driverId = document.getElementById('tripDriver').value;
     const customerId = document.getElementById('tripCustomer').value;
 
+    // 1. Existing Validations
+    if (!truckId) return alert('Please select a truck.');
+    if (!driverId) return alert('Please select a driver from the dropdown.');
+    if (!document.getElementById('tripFrom').value || !document.getElementById('tripTo').value) {
+      return alert('Please select both Origin and Destination regions.');
+    }
+
+    // 2. NEW: Check if the truck is already on an active trip
+    const activeTrip = DB.trips().find(t => t.truckId === truckId && t.status === 'In Transit');
+    if (activeTrip) {
+      const truck = DB.trucks().find(t => t.id === truckId);
+      const plate = truck ? truck.plateNumber : 'Unknown';
+      return alert(`This truck (${plate}) is already on an active trip to ${activeTrip.to}.\n\nPlease end the current trip before assigning a new one.`);
+    }
+
+    // 3. Proceed with saving if validation passes
     const tripId = 'trip_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
 
     const trip = {
@@ -640,16 +656,13 @@ const TripOps = {
       onTime: true
     };
 
-    if (!trip.truckId) return alert('Please select a truck.');
-    if (!trip.driverId) return alert('Please select a driver from the dropdown.');
-    if (!trip.from || !trip.to) return alert('Please select both Origin and Destination regions.');
-
     DB.push('trips', trip);
     
     if (typeof logActivity === 'function') {
       logActivity({ module: 'trips', action: 'create', description: `Trip ${trip.from} to ${trip.to}`, ref: trip.truckId, user: 'admin' });
     }
 
+    // 4. Save trip expenses if any
     if (this.tripExpenses.length > 0) {
       this.tripExpenses.forEach(exp => {
         DB.push('expenses', {
@@ -678,6 +691,7 @@ const TripOps = {
       this.tripExpenses = [];
     }
 
+    // 5. Record Income
     if (paidAmount > 0) {
       DB.push('income', {
         date: trip.date, truckId: trip.truckId, driverId: trip.driverId,
@@ -686,6 +700,7 @@ const TripOps = {
       });
     }
 
+    // 6. Record Debt if applicable
     if (balance > 0 && customerId) {
       DB.push('debts', {
         date: trip.date,
@@ -700,7 +715,7 @@ const TripOps = {
 
     alert('Trip saved successfully! Income, Expenses, and/or Debt records updated automatically.');
     App.refresh();
-  },
+  }
 
   deleteTrip(id) {
     if (confirm('Delete this trip? Note: This will NOT automatically reverse associated income, expense, or debt records.')) {
