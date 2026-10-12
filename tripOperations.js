@@ -17,15 +17,9 @@ const TripOps = {
         <h2><i class="fas fa-clipboard-list"></i> Operations — Trip Management</h2>
       </div>
 
-      <!-- GRID LAYOUT FOR FORMS (Responsive) -->
-      <div class="operations-grid" style="
-        display: grid; 
-        grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); 
-        gap: 20px; 
-        margin-bottom: 30px;
-      ">
+      <div class="operations-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap: 20px; margin-bottom: 30px;">
         
-        <!-- ========== ADD TRUCK ========== -->
+        <!-- ADD TRUCK -->
         <div class="form-section">
           <h2><i class="fas fa-truck"></i> Add New Truck</h2>
           <div class="form-row">
@@ -73,7 +67,7 @@ const TripOps = {
           </button>
         </div>
 
-        <!-- ========== ADD DRIVER ========== -->
+        <!-- ADD DRIVER -->
         <div class="form-section">
           <h2><i class="fas fa-user"></i> Add New Driver</h2>
           <div class="form-row">
@@ -104,7 +98,7 @@ const TripOps = {
           </button>
         </div>
 
-        <!-- ========== ADD CUSTOMER ========== -->
+        <!-- ADD CUSTOMER -->
         <div class="form-section">
           <h2><i class="fas fa-user-tie"></i> Add New Customer</h2>
           <div class="form-row">
@@ -129,7 +123,7 @@ const TripOps = {
           </button>
         </div>
 
-        <!-- ========== RECORD NEW TRIP ========== -->
+        <!-- RECORD NEW TRIP -->
         <div class="form-section">
           <h2><i class="fas fa-plus-circle"></i> Record New Trip</h2>
           
@@ -212,7 +206,7 @@ const TripOps = {
           </button>
         </div>
 
-        <!-- ========== TRIP EXPENSES ========== -->
+        <!-- TRIP EXPENSES -->
         <div class="form-section" style="border: 2px solid var(--primary); background: linear-gradient(135deg, #f0f9ff, #e0f2fe);">
           <h2><i class="fas fa-receipt"></i> Trip Expenses</h2>
           
@@ -231,14 +225,13 @@ const TripOps = {
               <label>Expense Type</label>
               <select id="expType" class="input-field" onchange="TripOps.handleExpenseTypeChange()">
                 <option value="">-- Select Expense --</option>
-                <option value="fuel">Fuel (Diesel/Petrol)</option>
+                <option value="fuel">Fuel</option>
                 <option value="driver_allowance">Driver Allowance</option>
                 <option value="turnboy_allowance">Turnboy Allowance</option>
               </select>
             </div>
           </div>
 
-          <!-- Fuel Specific Fields -->
           <div id="fuelFields" style="display: none;">
             <div class="form-row">
               <div class="form-group">
@@ -255,7 +248,6 @@ const TripOps = {
             </p>
           </div>
 
-          <!-- Allowance Fields -->
           <div id="allowanceFields" style="display: none;">
             <div class="form-group">
               <label>Amount (TZS)</label>
@@ -267,13 +259,12 @@ const TripOps = {
             <i class="fas fa-plus"></i> Add Expense
           </button>
 
-          <!-- Expense Summary Container (Updated dynamically without full page refresh) -->
           <div id="tripExpensesSummaryContainer"></div>
         </div>
 
       </div>
 
-      <!-- ========== FULL WIDTH: TRIP HISTORY ========== -->
+      <!-- TRIP HISTORY -->
       <div class="form-section">
         <h2><i class="fas fa-history"></i> Trip History</h2>
         <div class="table-wrapper">
@@ -291,8 +282,6 @@ const TripOps = {
     `;
   },
 
-  // ========== TRIP EXPENSE FUNCTIONS ==========
-  
   syncExpenseTruck() {
     const tripTruckId = document.getElementById('tripTruck')?.value;
     const expTruckSelect = document.getElementById('expTruck');
@@ -335,9 +324,6 @@ const TripOps = {
             <span style="font-weight: 600;">Total Trip Expenses:</span>
             <span style="font-weight: 800; color: var(--danger);">${Utils.fmtTZS(totalExpenses)}</span>
           </div>
-          <p style="font-size: 11px; color: var(--text-light); margin: 8px 0 0 0; text-align: right;">
-            <i class="fas fa-info-circle"></i> Deducted from trip revenue upon saving.
-          </p>
         </div>
       </div>
     `;
@@ -424,8 +410,6 @@ const TripOps = {
     this.renderExpenseSummary();
   },
 
-  // ========== EXISTING FUNCTIONS ==========
-
   renderTrailerPlates() {
     const count = Number(document.getElementById('truckTrailersCount').value) || 0;
     const container = document.getElementById('trailerPlatesContainer');
@@ -449,14 +433,12 @@ const TripOps = {
   addTruck() {
     const plate = document.getElementById('truckPlate').value.trim();
     if (!plate) return alert('Truck plate number is required.');
-
     const trailerCount = Number(document.getElementById('truckTrailersCount').value) || 0;
     const trailerPlates = [];
     for (let i = 1; i <= trailerCount; i++) {
       const tp = document.getElementById(`trailerPlate${i}`).value.trim();
       if (tp) trailerPlates.push(tp);
     }
-
     const truck = {
       plateNumber: plate,
       brand: document.getElementById('truckBrand').value,
@@ -467,19 +449,17 @@ const TripOps = {
       fuelType: document.getElementById('truckFuel').value,
       serviceStatus: 'Active'
     };
-
     DB.push('trucks', truck);
     if (typeof logActivity === 'function') {
       logActivity({ module: 'trucks', action: 'create', description: `Added truck ${truck.plateNumber}`, ref: truck.plateNumber, user: 'admin' });
     }
-    alert(`Truck "${plate}" added successfully with ${trailerCount} trailer(s)!`);
+    alert(`Truck "${plate}" added successfully!`);
     App.refresh();
   },
 
   addDriver() {
     const name = document.getElementById('drvName').value.trim();
     if (!name) return alert('Driver name is required.');
-
     const d = {
       name: name,
       phone: document.getElementById('drvPhone').value,
@@ -487,7 +467,6 @@ const TripOps = {
       truckId: document.getElementById('drvTruck').value,
       status: 'Active'
     };
-
     DB.push('drivers', d);
     if (typeof logActivity === 'function') {
       logActivity({ module: 'drivers', action: 'create', description: `Added driver ${d.name}`, ref: d.name, user: 'admin' });
@@ -499,13 +478,11 @@ const TripOps = {
   addCustomer() {
     const name = document.getElementById('custName').value.trim();
     if (!name) return alert('Customer name is required.');
-
     const c = {
       name: name,
       phone: document.getElementById('custPhone').value,
       location: document.getElementById('custLocation').value
     };
-
     DB.push('customers', c);
     if (typeof logActivity === 'function') {
       logActivity({ module: 'customers', action: 'create', description: `Added customer ${c.name}`, ref: c.name, user: 'admin' });
@@ -518,11 +495,9 @@ const TripOps = {
     const truckSelect = document.getElementById('tripTruck');
     const driverSelect = document.getElementById('tripDriver');
     if (!truckSelect || !driverSelect) return;
-
     const truckId = truckSelect.value;
     const drivers = DB.drivers();
     const assignedDriver = drivers.find(d => d.truckId === truckId);
-    
     if (assignedDriver) {
       driverSelect.value = assignedDriver.id;
     } else {
@@ -535,7 +510,6 @@ const TripOps = {
     const paid = Number(document.getElementById('tripPaidAmount').value) || 0;
     const balance = total - paid;
     const balanceInput = document.getElementById('tripBalance');
-
     if (balance > 0) {
       balanceInput.value = Utils.fmtTZS(balance) + ' (Debt)';
       balanceInput.style.color = '#dc2626';
@@ -555,7 +529,6 @@ const TripOps = {
     const from = document.getElementById('tripFrom').value;
     const to = document.getElementById('tripTo').value;
     const distInput = document.getElementById('tripDist');
-
     if (from && to && regionCoords[from] && regionCoords[to]) {
       const lat1 = regionCoords[from].lat, lon1 = regionCoords[from].lon;
       const lat2 = regionCoords[to].lat, lon2 = regionCoords[to].lon;
@@ -615,7 +588,7 @@ const TripOps = {
     const customerId = document.getElementById('tripCustomer').value;
 
     if (!truckId) return alert('Please select a truck.');
-    if (!driverId) return alert('Please select a driver from the dropdown.');
+    if (!driverId) return alert('Please select a driver.');
     if (!document.getElementById('tripFrom').value || !document.getElementById('tripTo').value) {
       return alert('Please select both Origin and Destination regions.');
     }
@@ -624,7 +597,7 @@ const TripOps = {
     if (activeTrip) {
       const truck = DB.trucks().find(t => t.id === truckId);
       const plate = truck ? truck.plateNumber : 'Unknown';
-      return alert(`This truck (${plate}) is already on an active trip to ${activeTrip.to}.\n\nPlease end the current trip before assigning a new one.`);
+      return alert(`This truck (${plate}) is already on an active trip to ${activeTrip.to}.\nPlease end the current trip first.`);
     }
 
     const tripId = 'trip_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
@@ -647,51 +620,32 @@ const TripOps = {
     };
 
     DB.push('trips', trip);
-    console.log('Trip saved:', trip);
     
     if (typeof logActivity === 'function') {
       logActivity({ module: 'trips', action: 'create', description: `Trip ${trip.from} to ${trip.to}`, ref: trip.truckId, user: 'admin' });
     }
 
-    // DEBUG: Check if there are expenses to save
-    console.log('Trip expenses to save:', this.tripExpenses);
-    console.log('Number of expenses:', this.tripExpenses.length);
-
+    // SAVE TRIP EXPENSES WITH tripId
     if (this.tripExpenses.length > 0) {
-      this.tripExpenses.forEach((exp, index) => {
-        console.log(`Saving expense ${index + 1}:`, exp);
-        
-        const expenseRecord = {
+      this.tripExpenses.forEach(exp => {
+        DB.push('expenses', {
           date: trip.date,
           truckId: exp.truckId,
           driverId: trip.driverId,
-          category: exp.type,
+          category: exp.type, // Saves as 'Fuel', 'Driver Allowance', or 'Turnboy Allowance'
           amount: exp.amount,
           liters: exp.liters,
           method: 'Cash',
           description: `Trip expense: ${exp.type} for ${trip.from} to ${trip.to}`,
-          tripId: trip.id
-        };
-        
-        console.log('Expense record to save:', expenseRecord);
-        DB.push('expenses', expenseRecord);
-        console.log('Expense saved to database');
+          tripId: trip.id // THIS IS THE KEY THAT LINKS IT TO THE TRIP
+        });
       });
       
       if (typeof logActivity === 'function') {
-        logActivity({ 
-          module: 'expenses', 
-          action: 'create', 
-          description: `Added ${this.tripExpenses.length} trip expenses`, 
-          ref: trip.truckId, 
-          user: 'admin' 
-        });
+        logActivity({ module: 'expenses', action: 'create', description: `Added ${this.tripExpenses.length} trip expenses`, ref: trip.truckId, user: 'admin' });
       }
       
-      this.tripExpenses = [];
-      console.log('Trip expenses cleared');
-    } else {
-      console.log('No trip expenses to save');
+      this.tripExpenses = []; // Clear temporary list
     }
 
     if (paidAmount > 0) {
@@ -714,9 +668,10 @@ const TripOps = {
       });
     }
 
-    alert('Trip saved successfully! Income, Expenses, and/or Debt records updated automatically.');
+    alert('Trip and expenses saved successfully!');
     App.refresh();
   },
+
   deleteTrip(id) {
     if (confirm('Delete this trip? Note: This will NOT automatically reverse associated income, expense, or debt records.')) {
       DB.remove('trips', id);
