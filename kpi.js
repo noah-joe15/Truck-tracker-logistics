@@ -6,18 +6,22 @@ const KPI = {
     const expenses = DB.expenses(), income = DB.income();
     const drivers = DB.drivers();
 
-    const totalRev = income.reduce((s, x) => s + Number(x.amount || 0), 0);
+        const totalRev = income.reduce((s, x) => s + Number(x.amount || 0), 0);
     const totalExp = expenses.reduce((s, x) => s + Number(x.amount || 0), 0);
-   const tripExpenses = expenses
-  .filter(e => {
-    const hasTripId = e.tripId && e.tripId !== '';
-    const isFuelExpense = e.category && e.category.includes('Fuel');
-    const isDriverAllowance = e.category === 'Driver Allowance' || e.category === 'Driver Allowance / Per Diem';
-    const isTurnboyAllowance = e.category === 'Turnboy Allowance';
-    return hasTripId && (isFuelExpense || isDriverAllowance || isTurnboyAllowance);
-  })
-  .reduce((s, x) => s + Number(x.amount || 0), 0);
     
+    // 1. Calculate totalKm FIRST so it can be used below
+    const totalKm = trips.reduce((s, x) => s + Number(x.distance || 0), 0);
+
+    const tripExpenses = expenses
+      .filter(e => {
+        const hasTripId = e.tripId && e.tripId !== '';
+        const isFuelExpense = e.category && e.category.includes('Fuel');
+        const isDriverAllowance = e.category === 'Driver Allowance' || e.category === 'Driver Allowance / Per Diem';
+        const isTurnboyAllowance = e.category === 'Turnboy Allowance';
+        return hasTripId && (isFuelExpense || isDriverAllowance || isTurnboyAllowance);
+      })
+      .reduce((s, x) => s + Number(x.amount || 0), 0);
+      
     const DIESEL_PRICE = 3430;
     const fuelExpenses = expenses.filter(e => 
       e.category === 'Fuel (Diesel/Petrol)' || e.category === 'Fuel'
@@ -28,20 +32,20 @@ const KPI = {
       return s + (liters > 0 ? liters : (Number(x.amount || 0) / DIESEL_PRICE));
     }, 0);
     
+    // 2. Now totalKm is already defined, so this works perfectly!
     const avgEco = totalFuel > 0 ? (totalKm / totalFuel).toFixed(2) : '0.00';
     const inTransit = trips.filter(t => t.status === 'In Transit').length;
     const onTime = trips.filter(t => t.status === 'Completed' && t.onTime).length;
     const completed = trips.filter(t => t.status === 'Completed').length;
     const onTimeRate = completed > 0 ? ((onTime / completed) * 100).toFixed(0) : 0;
     
-    // Running costs = ALL expenses (Trip expenses + Maintenance + Spare parts + Fines, etc.)
+    // 3. Running costs = ALL expenses
     const runningCosts = totalExp;
     const runningCostsMargin = totalRev > 0 ? ((runningCosts / totalRev) * 100).toFixed(1) : '0.0';
     const costPer100km = totalKm > 0 ? Math.round((runningCosts / totalKm) * 100) : 0;
     const netProfit = totalRev - totalExp;
     const profitMargin = totalRev > 0 ? ((netProfit / totalRev) * 100).toFixed(1) : '0.0';
-    const fleetUtilization = trucks.length > 0 ? Math.round((inTransit / trucks.length) * 100) : 0;
-    const today = new Date().toLocaleDateString('en-GB', { 
+    const fleetUtilization = trucks.length > 0 ? Math.round((inTransit / trucks.length) * 100) : 0;    const today = new Date().toLocaleDateString('en-GB', { 
       weekday: 'long', 
       year: 'numeric', 
       month: 'long', 
