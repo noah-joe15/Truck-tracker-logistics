@@ -140,7 +140,6 @@ const TripOps = {
             </div>
             <div class="form-group">
               <label>Truck</label>
-              <!-- ADDED: syncExpenseTruck() to keep panels in sync -->
               <select id="tripTruck" class="input-field" onchange="TripOps.autoFillDriver(); TripOps.syncExpenseTruck()">
                 <option value="">-- Select Truck --</option>
                 ${trucks.map(t => `<option value="${t.id}" data-driver="${t.driverId || ''}">${t.plateNumber}</option>`).join('')}
@@ -220,7 +219,6 @@ const TripOps = {
           <div class="form-row">
             <div class="form-group">
               <label>Select Truck</label>
-              <!-- REMOVED: onchange refresh that was wiping the form -->
               <select id="expTruck" class="input-field">
                 <option value="">-- Select Truck --</option>
                 ${trucks.map(t => `<option value="${t.id}">${t.plateNumber}</option>`).join('')}
@@ -295,7 +293,6 @@ const TripOps = {
 
   // ========== TRIP EXPENSE FUNCTIONS ==========
   
-  // NEW: Syncs the expense truck dropdown to match the trip truck dropdown
   syncExpenseTruck() {
     const tripTruckId = document.getElementById('tripTruck')?.value;
     const expTruckSelect = document.getElementById('expTruck');
@@ -304,7 +301,6 @@ const TripOps = {
     }
   },
 
-  // NEW: Renders only the expense list without wiping the rest of the form
   renderExpenseSummary() {
     const totalExpenses = this.tripExpenses.reduce((sum, exp) => sum + Number(exp.amount || 0), 0);
     const container = document.getElementById('tripExpensesSummaryContainer');
@@ -366,7 +362,7 @@ const TripOps = {
 
   calculateFuelLiters() {
     const amount = Number(document.getElementById('fuelAmount').value) || 0;
-    const DIESEL_PRICE = 3430; // EWURA price per liter
+    const DIESEL_PRICE = 3430;
     const liters = amount / DIESEL_PRICE;
     document.getElementById('fuelLiters').value = liters.toFixed(1) + ' L';
   },
@@ -420,14 +416,11 @@ const TripOps = {
     this.tripExpenses.push(expense);
     document.getElementById('expType').value = '';
     this.handleExpenseTypeChange();
-    
-    // Update DOM directly instead of App.refresh() to preserve form inputs
     this.renderExpenseSummary();
   },
 
   removeTripExpense(index) {
     this.tripExpenses.splice(index, 1);
-    // Update DOM directly instead of App.refresh()
     this.renderExpenseSummary();
   },
 
@@ -612,7 +605,7 @@ const TripOps = {
     }
   },
 
-   saveTrip() {
+  saveTrip() {
     const totalPrice = Number(document.getElementById('tripTotalPrice').value) || 0;
     const paidAmount = Number(document.getElementById('tripPaidAmount').value) || 0;
     const balance = totalPrice - paidAmount;
@@ -715,7 +708,7 @@ const TripOps = {
 
     alert('Trip saved successfully! Income, Expenses, and/or Debt records updated automatically.');
     App.refresh();
-  }
+  }, // <-- FIXED: Added missing comma here
 
   deleteTrip(id) {
     if (confirm('Delete this trip? Note: This will NOT automatically reverse associated income, expense, or debt records.')) {
@@ -727,7 +720,6 @@ const TripOps = {
     }
   },
 
-  // NEW: Called after render to sync UI state
   afterRender() {
     this.syncExpenseTruck();
     this.renderExpenseSummary();
