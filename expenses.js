@@ -3,11 +3,11 @@ const Expenses = {
   batchExpenses: {}, // Stores { 'Category Name': Amount }
   
   categories: [
-    'Fuel (Diesel/Petrol)', 'Maintenance & Servicing', 'Spare Parts',
-    'Tolls & Weighbridge', 'Parking Fees', 'Driver Allowance / Per Diem',
-    'Loading / Offloading', 'LATRA / Regulatory Fees', 'Insurance Renewal',
-    'Fines / Penalties', 'Other'
-  ],
+  'Maintenance & Servicing', 'Spare Parts',
+  'Tolls & Weighbridge', 'Parking Fees',
+  'Loading / Offloading', 'LATRA / Regulatory Fees',
+  'Insurance Renewal', 'Fines / Penalties', 'Other'
+],
   mobileProviders: ['M-Pesa (Vodacom)', 'Tigo Pesa', 'Airtel Money', 'HaloPesa (TTCL)'],
   banks: [
     'CRDB Bank', 'NMB Bank', 'NBC Bank', 'Stanbic Bank', 'Absa Bank',
