@@ -6,7 +6,7 @@ const KPI = {
     const expenses = DB.expenses(), income = DB.income();
     const drivers = DB.drivers();
 
-        const totalRev = income.reduce((s, x) => s + Number(x.amount || 0), 0);
+    const totalRev = income.reduce((s, x) => s + Number(x.amount || 0), 0);
     const totalExp = expenses.reduce((s, x) => s + Number(x.amount || 0), 0);
     
     // 1. Calculate totalKm FIRST so it can be used below
@@ -45,7 +45,9 @@ const KPI = {
     const costPer100km = totalKm > 0 ? Math.round((runningCosts / totalKm) * 100) : 0;
     const netProfit = totalRev - totalExp;
     const profitMargin = totalRev > 0 ? ((netProfit / totalRev) * 100).toFixed(1) : '0.0';
-    const fleetUtilization = trucks.length > 0 ? Math.round((inTransit / trucks.length) * 100) : 0;    const today = new Date().toLocaleDateString('en-GB', { 
+    const fleetUtilization = trucks.length > 0 ? Math.round((inTransit / trucks.length) * 100) : 0;
+    
+    const today = new Date().toLocaleDateString('en-GB', { 
       weekday: 'long', 
       year: 'numeric', 
       month: 'long', 
@@ -505,10 +507,10 @@ const KPI = {
               <span class="legend-label">Net profit</span>
               <span class="legend-value">${Utils.fmtTZS(netProfit)} (${profitMargin}%)</span>
             </div>
-           <div class="legend-row">
-  <span class="legend-label">Running costs</span>
-  <span class="legend-value">${Utils.fmtTZS(runningCosts)} (${runningCostsMargin}%)</span>
-</div>
+            <div class="legend-row">
+              <span class="legend-label">Running costs</span>
+              <span class="legend-value">${Utils.fmtTZS(runningCosts)} (${runningCostsMargin}%)</span>
+            </div>
             <div class="legend-row total">
               <span class="legend-label">Total revenue</span>
               <span class="legend-value">${Utils.fmtTZS(totalRev)}</span>
